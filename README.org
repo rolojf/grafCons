@@ -1,0 +1,2 @@
+* Plan de graficar el consumo eléctrico vs Genreación
+Incluyendo el subsidio
