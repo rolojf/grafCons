@@ -1,0 +1,17 @@
+{
+   "private": true,
+   "type": "module",
+   "name": "example",
+   "scripts": {
+      "postinstall": "elm-tooling install",
+      "start": "elm-watch hot",
+      "build": "elm-watch make --optimize",
+      "dev": "npm --prefix .. run build && elm-watch hot"
+   },
+   "devDependencies": {
+      "elm-tooling": "1.12.0",
+      "elm-watch": "^1.2.0-beta.3",
+      "esbuild": "0.15.18",
+      "uglify-js": "3.17.4"
+   }
+}
