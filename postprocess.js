@@ -1,6 +1,7 @@
 // @ts-check
 import * as esbuild from "esbuild";
 import * as UglifyJS from "uglify-js";
+import * as EOL2 from "elm-optimize-level-2"
 
 /**
  * @type {import("elm-watch/elm-watch-node").Postprocess}
@@ -15,8 +16,9 @@ export default async function postprocess({
     case "debug":
       return code;
 
-    case "optimize":
-      return minify(code, {
+  case "optimize":
+    const codigo = code // EOL2.transform(code, true);
+    return minify(codigo, {
         // `minimal: true` runs both UglifyJS and esbuild, which results in smaller output but is slow.
         // `minimal: false` runs only esbuild, which is super fast but results in slightly larger output.
         // This enables the `minimal` mode for _some_ targets, based on their names in elm-watch.json,
