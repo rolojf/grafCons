@@ -1,16 +1,25 @@
 module Main exposing (main)
 
-import Html exposing (Html)
-import Html.Attributes as Attr
+import Css.Global
+import Html.Styled as Html exposing (Html, div, text)
+import Html.Styled.Attributes as Attr exposing (css)
+import Tailwind.Breakpoints as TWBp
+import Tailwind.Theme as Theme
+import Tailwind.Utilities as Tw exposing (globalStyles)
 
 
-main : Html msg
 main =
-    Html.div
-        [ Attr.style "margin" "3em"
-        , Attr.style "border" "1px solid"
-        , Attr.style "border-radius" "1em"
-        , Attr.style "padding" "1em"
+    div []
+        [ Css.Global.global globalStyles
+        , div
+            [ css
+                [ Tw.m_3
+                , Tw.border_2
+                , Tw.border_r_2
+                , Tw.border_color Theme.red_200
+                , Tw.p_1
+                ]
+            ]
+            [ text "This page is just static HTML, rendered by Elm." ]
         ]
-        [ Html.text "This page is just static HTML, rendered by Elm."
-        ]
+        |> Html.toUnstyled
