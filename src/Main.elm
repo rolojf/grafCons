@@ -38,18 +38,80 @@ main =
         |> HtmlS.toUnstyled
 
 
+consumo =
+    [ { bimPago = "Jun"
+      , dosAtras = 1250
+      , unoAtras = 1500
+      , subsidio = 900
+      , limDAC = 1700
+      , gen = 1000
+      }
+    , { bimPago = "Ago"
+      , dosAtras = 1750
+      , unoAtras = 1450
+      , subsidio = 900
+      , limDAC = 1700
+      , gen = 1100
+      }
+    , { bimPago = "Sep"
+      , dosAtras = 1150
+      , unoAtras = 1000
+      , subsidio = 900
+      , limDAC = 1700
+      , gen = 925
+      }
+    , { bimPago = "Nov"
+      , dosAtras = 1250
+      , unoAtras = 950
+      , subsidio = 350
+      , limDAC = 1700
+      , gen = 950
+      }
+    , { bimPago = "Feb"
+      , dosAtras = 1250
+      , unoAtras = 1400
+      , subsidio = 350
+      , limDAC = 700
+      , gen = 860
+      }
+    , { bimPago = "Abr"
+      , dosAtras = 1150
+      , unoAtras = 1050
+      , subsidio = 350
+      , limDAC = 1700
+      , gen = 900
+      }
+    ]
+
+
 grafica : Html msg
 grafica =
     C.chart
-        [ CA.width 30
-        , CA.height 40
+        [ CA.width 50
+        , CA.height 50
         ]
-        [ C.bars []
-            [ C.bar .income []
-            , C.bar .spending []
+        [ C.labelAt .min
+            CA.middle
+            [ CA.moveLeft 25, CA.rotate 90 ]
+            [ S.text "Energía - kWh" ]
+        , C.bars [ CA.margin 0.13 ]
+            [ C.bar .dosAtras
+                [ CA.color CA.brown
+                , CA.opacity 0.4
+                ]
+            , C.bar .unoAtras
+                [ CA.color CA.brown
+                , CA.opacity 0.4
+                ]
+            , C.stacked
+                [ C.bar .subsidio [ CA.color CA.red, CA.opacity 0.9 ]
+                , C.bar
+                    (\elReg ->
+                        max 0 (max elReg.dosAtras elReg.unoAtras - elReg.subsidio)
+                    )
+                    [ CA.color CA.yellow ]
+                ]
+            , C.bar .gen [ CA.color CA.green ]
             ]
-            [ { income = 10, spending = 2 }
-            , { income = 12, spending = 6 }
-            , { income = 18, spending = 16 }
-            ]
+            consumo
         ]
