@@ -16,7 +16,7 @@ main =
                 [ Tw.m_3
                 , Tw.border_2
                 , Tw.border_r_2
-                , Tw.border_color Theme.red_200
+                , Tw.border_color Theme.red_400
                 , Tw.p_1
                 ]
             ]
