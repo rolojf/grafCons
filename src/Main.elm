@@ -40,7 +40,7 @@ main =
             [ css
                 [ Tw.max_w_screen_sm
                 , Tw.my_12
-                , Tw.mx_20
+                , Tw.mx_36
                 , Tw.h_full
                 ]
             ]
@@ -123,24 +123,22 @@ grafica =
         --, C.yTicks []
         , C.xLabels
             [ CA.fontSize 12
-            , CA.color "cyan"
+            , CA.color "blue"
             ]
         , C.yLabels
             [ CA.withGrid
             , CA.fontSize 12
-            , CA.color "red"
+            , CA.color "blue"
             ]
-
-        {- , C.labelAt
-           (CA.percent 20)
-           CA.middle
-           [ CA.moveLeft 5
-           , CA.rotate 90
-           , CA.fontSize 2
-           , CA.color "blue"
-           ]
-           [ S.text "Energía - kWh" ]
-        -}
+        , C.labelAt
+            (CA.percent -9)
+            CA.middle
+            [ CA.moveLeft 5
+            , CA.rotate 90
+            , CA.fontSize 18
+            , CA.color "blue"
+            ]
+            [ S.text "Energía - kWh" ]
         , C.bars [ CA.margin 0.13 ]
             [ C.bar .dosAtras
                 [ CA.color CA.brown
