@@ -149,12 +149,12 @@ grafica =
                 , CA.opacity 0.4
                 ]
             , C.stacked
-                [ C.bar .subsidio [ CA.color CA.red, CA.opacity 0.9 ]
-                , C.bar
+                [ C.bar
                     (\elReg ->
                         max 0 (max elReg.dosAtras elReg.unoAtras - elReg.subsidio)
                     )
                     [ CA.color CA.yellow ]
+                , C.bar .subsidio [ CA.color CA.red, CA.opacity 0.9 ]
                 ]
             , C.bar .gen [ CA.color CA.green ]
             ]
