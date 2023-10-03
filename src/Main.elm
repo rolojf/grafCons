@@ -19,21 +19,39 @@ import Tailwind.Utilities as Tw
 
 main : Html msg
 main =
-    HtmlS.div [ css [ Tw.container, Tw.mx_auto ] ]
+    HtmlS.div [ css [ Tw.container, Tw.mx_auto, Tw.bg_color Theme.amber_400 ] ]
         [ Css.Global.global Tw.globalStyles
         , HtmlS.div
             [ css
-                [ Tw.m_3
+                [ Tw.mt_3
                 , Tw.border_2
                 , Tw.border_r_2
                 , Tw.border_color Theme.red_600
-                , Tw.p_1
+                , Tw.p_2
                 ]
             ]
             [ HtmlS.text "This page is just static HTML, rendered by Elm." ]
+        , {- HtmlS.img
+             [ css
+                 [ Tw.block
+                 , Tw.overflow_clip
+
+                 -- Tw.max_w_screen_sm
+                 , Tw.mt_12
+                 , Tw.max_h_96
+                 ]
+             ]
+             [
+          -}
+          grafica |> HtmlS.fromUnstyled --]
         , HtmlS.div
-            [ css [ Tw.max_w_screen_sm ] ]
-            [ grafica |> HtmlS.fromUnstyled ]
+            [ css
+                [ Tw.bg_color Theme.blue_600
+                , Tw.w_96
+                , Tw.h_6
+                ]
+            ]
+            []
         ]
         |> HtmlS.toUnstyled
 
@@ -87,13 +105,38 @@ consumo =
 grafica : Html msg
 grafica =
     C.chart
-        [ CA.width 50
-        , CA.height 50
+        [ CA.width 480
+        , CA.height 360
+        , CA.htmlAttrs
+            [ Attr.style "background" "#fcf9e9"
+            , Attr.style "height" "100px"
+            , Attr.style "width" "50%"
+            ]
         ]
-        [ C.labelAt .min
-            CA.middle
-            [ CA.moveLeft 25, CA.rotate 90 ]
-            [ S.text "Energía - kWh" ]
+        [ C.yAxis [ CA.width 0.15, CA.noArrow, CA.color CA.darkBlue ]
+        , C.xAxis [ CA.width 0.15, CA.noArrow, CA.color CA.darkBlue ]
+
+        --, C.yTicks []
+        , C.xLabels
+            [ CA.fontSize 2
+            , CA.color "red"
+            ]
+        , C.yLabels
+            [ CA.withGrid
+            , CA.fontSize 2
+            , CA.color "red"
+            ]
+
+        {- , C.labelAt
+           (CA.percent 20)
+           CA.middle
+           [ CA.moveLeft 5
+           , CA.rotate 90
+           , CA.fontSize 2
+           , CA.color "red"
+           ]
+           [ S.text "Energía - kWh" ]
+        -}
         , C.bars [ CA.margin 0.13 ]
             [ C.bar .dosAtras
                 [ CA.color CA.brown
