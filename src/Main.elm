@@ -19,7 +19,12 @@ import Tailwind.Utilities as Tw
 
 main : Html msg
 main =
-    HtmlS.div [ css [ Tw.container, Tw.mx_auto, Tw.bg_color Theme.amber_400 ] ]
+    HtmlS.div
+        [ css
+            [ Tw.container
+            , Tw.mx_auto
+            ]
+        ]
         [ Css.Global.global Tw.globalStyles
         , HtmlS.div
             [ css
@@ -31,19 +36,15 @@ main =
                 ]
             ]
             [ HtmlS.text "This page is just static HTML, rendered by Elm." ]
-        , {- HtmlS.img
-             [ css
-                 [ Tw.block
-                 , Tw.overflow_clip
-
-                 -- Tw.max_w_screen_sm
-                 , Tw.mt_12
-                 , Tw.max_h_96
-                 ]
-             ]
-             [
-          -}
-          grafica |> HtmlS.fromUnstyled --]
+        , HtmlS.div
+            [ css
+                [ Tw.max_w_screen_sm
+                , Tw.my_12
+                , Tw.mx_20
+                , Tw.h_full
+                ]
+            ]
+            [ grafica |> HtmlS.fromUnstyled ]
         , HtmlS.div
             [ css
                 [ Tw.bg_color Theme.blue_600
@@ -107,23 +108,26 @@ grafica =
     C.chart
         [ CA.width 480
         , CA.height 360
-        , CA.htmlAttrs
-            [ Attr.style "background" "#fcf9e9"
-            , Attr.style "height" "100px"
-            , Attr.style "width" "50%"
-            ]
+
+        {- , CA.htmlAttrs
+           [ Attr.style "position" "absolute" ]
+           , Attr.style "background" "#fcf9e9"
+           , Attr.style "height" "50px"
+           , Attr.style "width" "50%"
+           ]
+        -}
         ]
         [ C.yAxis [ CA.width 0.15, CA.noArrow, CA.color CA.darkBlue ]
         , C.xAxis [ CA.width 0.15, CA.noArrow, CA.color CA.darkBlue ]
 
         --, C.yTicks []
         , C.xLabels
-            [ CA.fontSize 2
-            , CA.color "red"
+            [ CA.fontSize 12
+            , CA.color "cyan"
             ]
         , C.yLabels
             [ CA.withGrid
-            , CA.fontSize 2
+            , CA.fontSize 12
             , CA.color "red"
             ]
 
@@ -133,7 +137,7 @@ grafica =
            [ CA.moveLeft 5
            , CA.rotate 90
            , CA.fontSize 2
-           , CA.color "red"
+           , CA.color "blue"
            ]
            [ S.text "Energía - kWh" ]
         -}
