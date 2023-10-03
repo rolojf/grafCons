@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Array exposing (Array)
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
@@ -57,48 +58,88 @@ main =
         |> HtmlS.toUnstyled
 
 
+meses : Array String
+meses =
+    Array.fromList
+        [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
+
+
+saltaUnMes =
+    True
+
+
+limDAC =
+    850
+
+
+paneles =
+    8
+
+
 consumo =
-    [ { bimPago = "Jun"
-      , dosAtras = 1250
-      , unoAtras = 1500
-      , subsidio = 900
-      , limDAC = 1700
-      , gen = 1000
+    [ { dosAtras = 0
+      , unoAtras = 251
+      , subsidio = 175
+      , gen = 508
       }
-    , { bimPago = "Ago"
-      , dosAtras = 1750
-      , unoAtras = 1450
-      , subsidio = 900
-      , limDAC = 1700
-      , gen = 1100
+    , { dosAtras = 0
+      , unoAtras = 257
+      , subsidio = 175
+      , gen = 558
       }
-    , { bimPago = "Sep"
-      , dosAtras = 1150
-      , unoAtras = 1000
-      , subsidio = 900
-      , limDAC = 1700
-      , gen = 925
+    , { dosAtras = 0
+      , unoAtras = 428
+      , subsidio = 175
+      , gen = 712
       }
-    , { bimPago = "Nov"
-      , dosAtras = 1250
-      , unoAtras = 950
-      , subsidio = 350
-      , limDAC = 1700
-      , gen = 950
+    , { dosAtras = 0
+      , unoAtras = 468
+      , subsidio = 450
+      , gen = 794
       }
-    , { bimPago = "Feb"
-      , dosAtras = 1250
-      , unoAtras = 1400
-      , subsidio = 350
-      , limDAC = 700
-      , gen = 860
+
+    -- Mayo
+    , { dosAtras = 0
+      , unoAtras = 962
+      , subsidio = 450
+      , gen = 838
       }
-    , { bimPago = "Abr"
-      , dosAtras = 1150
-      , unoAtras = 1050
-      , subsidio = 350
-      , limDAC = 1700
-      , gen = 900
+    , { dosAtras = 0
+      , unoAtras = 911
+      , subsidio = 450
+      , gen = 827
+      }
+    , { dosAtras = 0
+      , unoAtras = 1002
+      , subsidio = 450
+      , gen = 884
+      }
+
+    -- Ago
+    , { dosAtras = 0
+      , unoAtras = 889
+      , subsidio = 450
+      , gen = 838
+      }
+    , { dosAtras = 980
+      , unoAtras = 1350
+      , subsidio = 450
+      , gen = 699
+      }
+    , { dosAtras = 0
+      , unoAtras = 511
+      , subsidio = 175
+      , gen = 692
+      }
+    , { dosAtras = 0
+      , unoAtras = 413
+      , subsidio = 175
+      , gen = 584
+      }
+    , { dosAtras = 0
+      , unoAtras = 338
+      , subsidio = 175
+      , gen = 493
       }
     ]
 
@@ -108,23 +149,21 @@ grafica =
     C.chart
         [ CA.width 480
         , CA.height 360
-
-        {- , CA.htmlAttrs
-           [ Attr.style "position" "absolute" ]
-           , Attr.style "background" "#fcf9e9"
-           , Attr.style "height" "50px"
-           , Attr.style "width" "50%"
-           ]
-        -}
         ]
         [ C.yAxis [ CA.width 0.15, CA.noArrow, CA.color CA.darkBlue ]
         , C.xAxis [ CA.width 0.15, CA.noArrow, CA.color CA.darkBlue ]
-
-        --, C.yTicks []
-        , C.xLabels
-            [ CA.fontSize 12
-            , CA.color "blue"
-            ]
+        , C.generate 12 C.ints .x [] <|
+            \plane valor ->
+                [ C.xLabel
+                    [ CA.x (toFloat valor), CA.fontSize 12, CA.color "blue" ]
+                    [ S.text <|
+                        Maybe.withDefault "NoMes"
+                            (Array.get
+                                (valor - 1)
+                                meses
+                            )
+                    ]
+                ]
         , C.yLabels
             [ CA.withGrid
             , CA.fontSize 12
@@ -140,23 +179,33 @@ grafica =
             ]
             [ S.text "Energía - kWh" ]
         , C.bars [ CA.margin 0.13 ]
-            [ C.bar .dosAtras
-                [ CA.color CA.brown
-                , CA.opacity 0.4
-                ]
-            , C.bar .unoAtras
-                [ CA.color CA.brown
-                , CA.opacity 0.4
-                ]
-            , C.stacked
-                [ C.bar
+            [ {- C.bar .dosAtras
+                     [ CA.color CA.brown
+                     , CA.opacity 0.4
+                     ]
+                 , C.bar .unoAtras
+                     [ CA.color CA.brown
+                     , CA.opacity 0.4
+                     ]
+                 ,
+              -}
+              C.stacked
+                [ C.bar .subsidio [ CA.color CA.yellow, CA.opacity 0.9 ]
+                , C.bar
                     (\elReg ->
-                        max 0 (max elReg.dosAtras elReg.unoAtras - elReg.subsidio)
+                        let
+                            elMax =
+                                max 0 (max elReg.dosAtras elReg.unoAtras)
+                        in
+                        if elMax == 0 then
+                            0
+
+                        else
+                            elMax - elReg.subsidio
                     )
-                    [ CA.color CA.yellow ]
-                , C.bar .subsidio [ CA.color CA.red, CA.opacity 0.9 ]
+                    [ CA.color CA.red ]
                 ]
-            , C.bar .gen [ CA.color CA.green ]
+            , C.bar (\reg -> reg.gen * paneles / 10) [ CA.color CA.green ]
             ]
             consumo
         ]
