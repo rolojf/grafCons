@@ -1,7 +1,51 @@
 
-src/Main.elm,40
-module MainMain1,0
-main =main11,279
+src/Main.elm,708
+module Main2Main21,0
+main =main22,493
+meses =meses62,1433
+saltaUnMes =saltaUnMes67,1557
+limDAC =limDAC71,1581
+paneles =paneles75,1600
+consumo1 =consumo179,1618
+generacion =generacion148,2805
+type BimestreBimestre152,2884
+    = ParNonParNon153,2898
+    | NonParNonPar154,2911
+esteCaso =esteCaso158,2946
+bimestresParNon =bimestresParNon163,2997
+bimestresNonPar =bimestresNonPar168,3079
+consumoPaAtras =consumoPaAtras173,3159
+bimestreUltimo =bimestreUltimo178,3291
+listadoDeBimestres =listadoDeBimestres183,3347
+seQuedanBimestres =seQuedanBimestres195,3573
+consumoEnOrden =consumoEnOrden213,3997
+nuevo =nuevo217,4092
+consumo =consumo225,4189
+grafica =grafica294,5371
+
+src/Main2.elm,708
+module Main2Main21,0
+main =main22,493
+meses =meses62,1433
+saltaUnMes =saltaUnMes67,1557
+limDAC =limDAC71,1581
+paneles =paneles75,1600
+consumo1 =consumo179,1618
+generacion =generacion148,2805
+type BimestreBimestre152,2884
+    = ParNonParNon153,2898
+    | NonParNonPar154,2911
+esteCaso =esteCaso158,2946
+bimestresParNon =bimestresParNon163,2997
+bimestresNonPar =bimestresNonPar168,3079
+consumoPaAtras =consumoPaAtras173,3159
+bimestreUltimo =bimestreUltimo178,3291
+listadoDeBimestres =listadoDeBimestres183,3347
+seQuedanBimestres =seQuedanBimestres195,3573
+consumoEnOrden =consumoEnOrden213,3997
+nuevo =nuevo217,4092
+consumo =consumo225,4189
+grafica =grafica294,5371
 
 node_modules/node-elm-compiler/examples/HelloWorld.elm,38
 module MainMain1,0
