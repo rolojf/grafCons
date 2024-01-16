@@ -19,10 +19,6 @@ import Tailwind.Theme as Theme
 import Tailwind.Utilities as Tw
 
 
-
-{- Este es el gráfico para el consumo del cliente de Arqui3 15-ene-2024 -}
-
-
 main : Html msg
 main =
     HtmlS.div
@@ -32,18 +28,16 @@ main =
             ]
         ]
         [ Css.Global.global Tw.globalStyles
-
-        {- , HtmlS.div
-           [ css
-               [ Tw.mt_3
-               , Tw.border_2
-               , Tw.border_r_2
-               , Tw.border_color Theme.red_600
-               , Tw.p_2
-               ]
-           ]
-           [ HtmlS.text "This page is just static HTML, rendered by Elm." ]
-        -}
+        , HtmlS.div
+            [ css
+                [ Tw.mt_3
+                , Tw.border_2
+                , Tw.border_r_2
+                , Tw.border_color Theme.red_600
+                , Tw.p_2
+                ]
+            ]
+            [ HtmlS.text "This page is just static HTML, rendered by Elm." ]
         , HtmlS.div
             [ css
                 [ Tw.max_w_screen_sm
@@ -63,13 +57,9 @@ main =
             []
         , HtmlS.div
             [ css [ Tw.text_3xl, Tw.text_color Theme.lime_800 ] ]
-            [ HtmlS.text (Debug.toString (paneles * capPanelesWatts / (4 * 595))) ]
+            [ HtmlS.text (Debug.toString consumoUltimoA) ]
         ]
         |> HtmlS.toUnstyled
-
-
-
--- * Valores Generales
 
 
 meses : Array String
@@ -78,8 +68,89 @@ meses =
         [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
 
 
+saltaUnMes =
+    True
+
+
 limDAC =
     850
+
+
+paneles =
+    8
+
+
+consumo1 =
+    [ { dosAtras = 0
+      , unoAtras = 251
+      , subsidio = 175
+      , gen = 508
+      }
+    , { dosAtras = 0
+      , unoAtras = 257
+      , subsidio = 175
+      , gen = 558
+      }
+    , { dosAtras = 0
+      , unoAtras = 428
+      , subsidio = 175
+      , gen = 712
+      }
+    , { dosAtras = 0
+      , unoAtras = 468
+      , subsidio = 450
+      , gen = 794
+      }
+
+    -- Mayo
+    , { dosAtras = 0
+      , unoAtras = 962
+      , subsidio = 450
+      , gen = 838
+      }
+    , { dosAtras = 0
+      , unoAtras = 911
+      , subsidio = 450
+      , gen = 827
+      }
+    , { dosAtras = 0
+      , unoAtras = 1002
+      , subsidio = 450
+      , gen = 884
+      }
+
+    -- Ago
+    , { dosAtras = 0
+      , unoAtras = 889
+      , subsidio = 450
+      , gen = 838
+      }
+    , { dosAtras = 980
+      , unoAtras = 1350
+      , subsidio = 450
+      , gen = 699
+      }
+    , { dosAtras = 0
+      , unoAtras = 511
+      , subsidio = 175
+      , gen = 692
+      }
+    , { dosAtras = 0
+      , unoAtras = 413
+      , subsidio = 175
+      , gen = 584
+      }
+    , { dosAtras = 0
+      , unoAtras = 338
+      , subsidio = 175
+      , gen = 493
+      }
+    ]
+
+
+generacion : Array Int
+generacion =
+    [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ] |> Array.fromList
 
 
 type Bimestre
@@ -87,48 +158,19 @@ type Bimestre
     | NonPar
 
 
-
--- generación de 4 paneles de 595w = 2.38kW
-
-
-genera =
-    [ 245, 259, 331, 337, 366, 367, 379, 374, 311, 287, 247, 233 ] |> Array.fromList
-
-
-
--- * Valores Particulares
-
-
-saltaUnMes =
-    True
-
-
-paneles =
-    12
-
-
-capPanelesWatts =
-    595
-
-
 consumoPaAtras : List Int
 consumoPaAtras =
-    [ 1041, 1706, 2552, 2106, 1149, 1088, 1253, 1041, 2148, 1930, 807, 1552 ]
-        |> List.reverse
+    [ 1688, 1731, 1386, 984, 917, 1037, 1390, 1342, 1564, 995, 1107, 1193 ] |> List.reverse
 
 
 bimestreUltimo : Int
 bimestreUltimo =
-    1112
+    89
 
 
 esteCaso : Bimestre
 esteCaso =
-    NonPar
-
-
-
--- * Construcción automática de listados para graficar
+    ParNon
 
 
 bimestresParNon : List Int
@@ -141,24 +183,8 @@ bimestresNonPar =
     [ 12, 34, 56, 78, 910, 1112 ]
 
 
-listadoqueAplica : Array Int
-listadoqueAplica =
-    (case esteCaso of
-        ParNon ->
-            bimestresParNon
-
-        NonPar ->
-            bimestresNonPar
-    )
-        |> Array.fromList
-
-
-
--- construyo un listado largo (3x) de bimestres solo para ver que meses voy a sacar para cada bimestre
-
-
-listadoLargoDeBimestres : List Int
-listadoLargoDeBimestres =
+listadoDeBimestres : List Int
+listadoDeBimestres =
     case esteCaso of
         ParNon ->
             List.repeat 3 bimestresParNon |> List.concat
@@ -173,17 +199,16 @@ seQuedanBimestres =
         checaSi : Int -> List Int -> List Int
         checaSi valor listaAcum =
             if List.length listaAcum == 0 then
-                if valor == bimestreUltimo then
-                    [ valor ]
+                if valor <= bimestreUltimo then
+                    []
 
                 else
-                    []
+                    [ valor ]
 
             else
                 valor :: listaAcum
     in
-    List.foldl checaSi [] listadoLargoDeBimestres
-        |> List.reverse
+    List.foldl checaSi [] listadoDeBimestres |> List.reverse
 
 
 consumoEnOrden : List ( Int, Int )
@@ -201,6 +226,22 @@ consumoUltimoA =
     List.drop 6 consumoEnOrden |> Dict.fromList
 
 
+listadoqueAplica : Array Int
+listadoqueAplica =
+    (case esteCaso of
+        ParNon ->
+            bimestresParNon
+
+        NonPar ->
+            bimestresNonPar
+    )
+        |> Array.fromList
+
+
+genera =
+    [ 233, 246, 314, 320, 347, 348, 360, 355, 296, 273, 234, 221 ] |> Array.fromList
+
+
 consumo =
     let
         obtenBimestre : Int -> Int
@@ -214,10 +255,9 @@ consumo =
                 |> Maybe.withDefault 0
                 |> toFloat
 
-        -- TODO Actualmente en obtenGenera capturo uso meses manualmente
         obtenGenera : Int -> Int -> Float
         obtenGenera m1 m2 =
-            (paneles * capPanelesWatts / (4 * 595))
+            1.5
                 * ((Array.get (m1 - 1) genera |> Maybe.withDefault 0)
                     + (Array.get (m2 - 1) genera |> Maybe.withDefault 0)
                   )
@@ -225,32 +265,34 @@ consumo =
     [ { dosAtras = obtenConsumo 0 consumoPenultimoA
       , unoAtras = obtenConsumo 0 consumoUltimoA
       , subsidio = 350
-      , gen = obtenGenera 1 2
+      , gen = obtenGenera 2 3
       }
     , { dosAtras = obtenConsumo 1 consumoPenultimoA
       , unoAtras = obtenConsumo 1 consumoUltimoA
-      , subsidio = 150 * 3 + 175
-      , gen = obtenGenera 3 4
+      , subsidio = 900
+      , gen = obtenGenera 4 5
       }
     , { dosAtras = obtenConsumo 2 consumoPenultimoA
       , unoAtras = obtenConsumo 2 consumoUltimoA
       , subsidio = 900
-      , gen = obtenGenera 5 6
+      , gen = obtenGenera 6 7
       }
     , { dosAtras = obtenConsumo 3 consumoPenultimoA
       , unoAtras = obtenConsumo 3 consumoUltimoA
       , subsidio = 900
-      , gen = obtenGenera 7 8
+      , gen = obtenGenera 8 9
       }
+
+    -- Ago
     , { dosAtras = obtenConsumo 4 consumoPenultimoA
       , unoAtras = obtenConsumo 4 consumoUltimoA
-      , subsidio = 150 * 3 + 175
-      , gen = obtenGenera 9 10
+      , subsidio = 350
+      , gen = obtenGenera 10 11
       }
     , { dosAtras = obtenConsumo 5 consumoPenultimoA
       , unoAtras = obtenConsumo 5 consumoUltimoA
       , subsidio = 350
-      , gen = obtenGenera 11 12
+      , gen = obtenGenera 12 1
       }
     ]
 
@@ -263,27 +305,24 @@ grafica =
         ]
         [ C.yAxis [ CA.width 0.15, CA.noArrow, CA.color CA.darkBlue ]
         , C.xAxis [ CA.width 0.15, CA.noArrow, CA.color CA.darkBlue ]
-        , -- para generar los meses que salen abajo en eje x
-          C.generate 12 C.ints .x [] <|
+        , C.generate 12 C.ints .x [] <|
             \plane valor ->
                 [ C.xLabel
                     [ CA.x (toFloat valor), CA.fontSize 12, CA.color "blue" ]
                     [ S.text <|
-                        Maybe.withDefault "Ene"
+                        Maybe.withDefault "Feb"
                             (Array.get
-                                (valor * 2 - 2)
+                                (valor * 2 + 1)
                                 meses
                             )
                     ]
                 ]
         , C.yLabels
-            -- medidas del eje y
             [ CA.withGrid
             , CA.fontSize 12
             , CA.color "blue"
             ]
         , C.labelAt
-            -- Leyenda a la izquierda del eje y
             (CA.percent -9)
             CA.middle
             [ CA.moveLeft 5
