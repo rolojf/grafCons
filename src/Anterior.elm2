@@ -1,7 +1,5 @@
 module Main exposing (main)
 
--- * Imports
-
 import Array exposing (Array)
 import Chart as C
 import Chart.Attributes as CA
@@ -9,8 +7,6 @@ import Chart.Events as CE
 import Chart.Item as CI
 import Css.Global
 import Dict exposing (Dict)
-import FormatNumber exposing (format)
-import FormatNumber.Locales exposing (usLocale)
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Styled as HtmlS
@@ -24,8 +20,7 @@ import Tailwind.Utilities as Tw
 
 
 
--- * Main que en este caso es solo el view
--- Este es el gráfico para el consumo del cliente de David de Yessica 24-ene-2024
+{- Este es el gráfico para el consumo del cliente de Arqui3 15-ene-2024 -}
 
 
 main : Html msg
@@ -37,6 +32,18 @@ main =
             ]
         ]
         [ Css.Global.global Tw.globalStyles
+
+        {- , HtmlS.div
+           [ css
+               [ Tw.mt_3
+               , Tw.border_2
+               , Tw.border_r_2
+               , Tw.border_color Theme.red_600
+               , Tw.p_2
+               ]
+           ]
+           [ HtmlS.text "This page is just static HTML, rendered by Elm." ]
+        -}
         , HtmlS.div
             [ css
                 [ Tw.max_w_screen_sm
@@ -46,10 +53,18 @@ main =
                 ]
             ]
             [ grafica |> HtmlS.fromUnstyled ]
+        , HtmlS.div
+            [ css
+                [ Tw.bg_color Theme.blue_600
+                , Tw.w_96
+                , Tw.h_6
+                ]
+            ]
+            []
 
         {- , HtmlS.div
            [ css [ Tw.text_3xl, Tw.text_color Theme.lime_800 ] ]
-           [ HtmlS.text (Debug.toString listadoLargoDeBimestres) ]
+           [ HtmlS.text (Debug.toString (paneles * capPanelesWatts / (4 * 595))) ]
         -}
         ]
         |> HtmlS.toUnstyled
@@ -95,12 +110,12 @@ paneles =
 
 
 capPanelesWatts =
-    580
+    595
 
 
 consumoPaAtras : List Int
 consumoPaAtras =
-    [ 1266, 3807, 3186, 1847, 1011, 1086, 1263, 3032, 3963, 3097, 1098, 1335 ]
+    [ 1041, 1706, 2552, 2106, 1149, 1088, 1253, 1041, 2148, 1930, 807, 1552 ]
         |> List.reverse
 
 
@@ -115,7 +130,7 @@ esteCaso =
 
 
 
--- * Construcción de listados de bimestres
+-- * Construcción automática de listados para graficar
 
 
 bimestresParNon : List Int
@@ -173,10 +188,6 @@ seQuedanBimestres =
         |> List.reverse
 
 
-
--- * Repartición del consumo
-
-
 consumoEnOrden : List ( Int, Int )
 consumoEnOrden =
     List.map2 (\bim cons -> ( bim, cons )) seQuedanBimestres consumoPaAtras
@@ -212,90 +223,38 @@ consumo =
                 * ((Array.get (m1 - 1) genera |> Maybe.withDefault 0)
                     + (Array.get (m2 - 1) genera |> Maybe.withDefault 0)
                   )
-
-        subsidioMes : Int -> Int
-        subsidioMes mes =
-            if mes < 4 || mes > 9 then
-                175
-
-            else
-                450
-
-        obtenSubsidio : Int -> Int -> Float
-        obtenSubsidio mes1 mes2 =
-            subsidioMes mes1 + subsidioMes mes2 |> toFloat
     in
     [ { dosAtras = obtenConsumo 0 consumoPenultimoA
       , unoAtras = obtenConsumo 0 consumoUltimoA
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 1 2
-
-                NonPar ->
-                    obtenSubsidio 2 3
+      , subsidio = 350
       , gen = obtenGenera 1 2
       }
     , { dosAtras = obtenConsumo 1 consumoPenultimoA
       , unoAtras = obtenConsumo 1 consumoUltimoA
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 3 4
-
-                NonPar ->
-                    obtenSubsidio 4 5
+      , subsidio = 150 * 3 + 175
       , gen = obtenGenera 3 4
       }
     , { dosAtras = obtenConsumo 2 consumoPenultimoA
       , unoAtras = obtenConsumo 2 consumoUltimoA
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 5 6
-
-                NonPar ->
-                    obtenSubsidio 6 7
+      , subsidio = 900
       , gen = obtenGenera 5 6
       }
     , { dosAtras = obtenConsumo 3 consumoPenultimoA
       , unoAtras = obtenConsumo 3 consumoUltimoA
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 7 8
-
-                NonPar ->
-                    obtenSubsidio 8 9
+      , subsidio = 900
       , gen = obtenGenera 7 8
       }
     , { dosAtras = obtenConsumo 4 consumoPenultimoA
       , unoAtras = obtenConsumo 4 consumoUltimoA
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 9 10
-
-                NonPar ->
-                    obtenSubsidio 10 11
+      , subsidio = 150 * 3 + 175
       , gen = obtenGenera 9 10
       }
     , { dosAtras = obtenConsumo 5 consumoPenultimoA
       , unoAtras = obtenConsumo 5 consumoUltimoA
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 11 12
-
-                NonPar ->
-                    obtenSubsidio 12 1
+      , subsidio = 350
       , gen = obtenGenera 11 12
       }
     ]
-
-
-
--- * Armado de la Gráfica
 
 
 grafica : Html msg
@@ -340,14 +299,12 @@ grafica =
                 [ CA.color CA.brown
                 , CA.opacity 0.4
                 ]
-                |> C.named "Consida dos años atrás"
             , C.bar .unoAtras
                 [ CA.color CA.brown
                 , CA.opacity 0.4
                 ]
-                |> C.named "Consumida año pasado"
             , C.stacked
-                [ C.bar .subsidio [ CA.color CA.yellow, CA.opacity 0.9 ] |> C.named "Subsidiada- Barata"
+                [ C.bar .subsidio [ CA.color CA.yellow, CA.opacity 0.9 ]
                 , C.bar
                     (\elReg ->
                         let
@@ -361,22 +318,8 @@ grafica =
                             elMax - elReg.subsidio
                     )
                     [ CA.color CA.red ]
-                    |> C.named "Excedente - Cara"
                 ]
             , C.bar (\reg -> reg.gen) [ CA.color CA.green ]
-                |> C.named
-                    ("Generada x Panel "
-                        ++ format usLocale (capPanelesWatts * paneles / 1000)
-                        ++ " kWp"
-                    )
             ]
             consumo
-        , C.legendsAt .max
-            .max
-            [ CA.column
-            , CA.moveLeft 15
-            , CA.alignRight
-            , CA.spacing 5
-            ]
-            []
         ]
