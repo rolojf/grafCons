@@ -1,30 +1,30 @@
 
-src/Main.elm,877
+src/Main.elm,878
 module MainMain1,0
 main =main32,749
-meses =meses63,1393
-limDAC =limDAC68,1517
-type BimestreBimestre72,1536
-    = ParNonParNon73,1550
-    | NonParNonPar74,1563
--- generación de 4 paneles de 595w =--78,1579
-genera =genera81,1626
-saltaUnMes =saltaUnMes89,1751
-paneles =paneles93,1775
-capPanelesWatts =capPanelesWatts97,1794
-consumoPaAtras =consumoPaAtras102,1848
-bimestreUltimo =bimestreUltimo108,1991
-esteCaso =esteCaso113,2039
-bimestresParNon =bimestresParNon122,2137
-bimestresNonPar =bimestresNonPar127,2219
-listadoqueAplica =listadoqueAplica132,2302
-listadoLargoDeBimestres =listadoLargoDeBimestres148,2611
-seQuedanBimestres =seQuedanBimestres158,2840
-consumoEnOrden =consumoEnOrden181,3322
-consumoPenultimoA =consumoPenultimoA186,3450
-consumoUltimoA =consumoUltimoA191,3550
-consumo =consumo195,3617
-grafica =grafica302,6621
+meses =meses65,1432
+limDAC =limDAC70,1556
+type BimestreBimestre74,1575
+    = ParNonParNon75,1589
+    | NonParNonPar76,1602
+-- generación de 4 paneles de 595w =--80,1618
+genera =genera83,1665
+saltaUnMes =saltaUnMes92,1808
+paneles =paneles97,1848
+capPanelesWatts =capPanelesWatts101,1866
+consumoPaAtras =consumoPaAtras106,1920
+bimestreUltimo =bimestreUltimo116,2125
+esteCaso =esteCaso125,2208
+bimestresParNon =bimestresParNon134,2306
+bimestresNonPar =bimestresNonPar139,2388
+listadoqueAplica =listadoqueAplica144,2471
+listadoLargoDeBimestres =listadoLargoDeBimestres160,2780
+seQuedanBimestres =seQuedanBimestres170,3009
+consumoEnOrden =consumoEnOrden193,3491
+consumoPenultimoA =consumoPenultimoA198,3619
+consumoUltimoA =consumoUltimoA203,3719
+consumo =consumo207,3786
+grafica =grafica314,6790
 
 node_modules/node-elm-compiler/examples/HelloWorld.elm,38
 module MainMain1,0

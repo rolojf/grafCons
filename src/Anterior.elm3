@@ -48,10 +48,8 @@ main =
             [ grafica |> HtmlS.fromUnstyled ]
 
         {- , HtmlS.div
-           [ css [ Tw.text_3xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
-           [ HtmlS.text (Debug.toString consumoEnOrden)
-           , HtmlS.br [] []
-           ]
+           [ css [ Tw.text_3xl, Tw.text_color Theme.lime_800 ] ]
+           [ HtmlS.text (Debug.toString listadoLargoDeBimestres) ]
         -}
         ]
         |> HtmlS.toUnstyled
@@ -88,37 +86,27 @@ genera =
 -- * Valores Particulares
 
 
-saltaUnMes : Bool
 saltaUnMes =
     True
 
 
-paneles : Float
 paneles =
-    8
+    12
 
 
 capPanelesWatts =
-    545
+    580
 
 
 consumoPaAtras : List Int
 consumoPaAtras =
-    [ 456, 1138, 2067, 1559, 897, 598, 452, 1097, 1874, 1960, 1332, 471 ]
+    [ 1266, 3807, 3186, 1847, 1011, 1086, 1263, 3032, 3963, 3097, 1098, 1335 ]
         |> List.reverse
-
-
-
--- bimestre más antiguo que aparece en el historial de consumo
 
 
 bimestreUltimo : Int
 bimestreUltimo =
-    12
-
-
-
--- del bimestre último capturado
+    1112
 
 
 esteCaso : Bimestre
