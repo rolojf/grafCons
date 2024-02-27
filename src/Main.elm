@@ -1,4 +1,4 @@
-module Main exposing (main)
+module Main exposing (..)
 
 -- * Imports
 
@@ -46,13 +46,11 @@ main =
                 ]
             ]
             [ grafica |> HtmlS.fromUnstyled ]
-
-        {- , HtmlS.div
-           [ css [ Tw.text_3xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
-           [ HtmlS.text (Debug.toString consumoEnOrden)
-           , HtmlS.br [] []
-           ]
-        -}
+        , HtmlS.div
+            [ css [ Tw.text_3xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
+            [ HtmlS.text (Debug.toString (getMesNum Ene))
+            , HtmlS.br [] []
+            ]
         ]
         |> HtmlS.toUnstyled
 
@@ -61,10 +59,59 @@ main =
 -- * Valores Generales
 
 
+type Mes
+    = Ene
+    | Feb
+    | Mar
+    | Abr
+    | May
+    | Jun
+    | Jul
+    | Ago
+    | Sep
+    | Oct
+    | Nov
+    | Dic
+
+
 meses : Array String
 meses =
     Array.fromList
         [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
+
+
+mesesT : Array Mes
+mesesT =
+    Array.fromList
+        [ Ene, Feb, Mar, Abr, May, Jun, Jul, Ago, Sep, Oct, Nov, Dic ]
+
+
+
+-- getMesNum : Mes -> Int
+
+
+getMesNum cualMes =
+    Array.indexedMap
+        (\indice mes ->
+            if mes == cualMes then
+                indice + 1
+
+            else
+                0
+        )
+        mesesT
+        |> Array.toList
+        |> List.sum
+
+
+bimestresDeHistorial : Int
+bimestresDeHistorial =
+    12
+
+
+bimestrasMasAntiguos : ( Mes, Mes )
+bimestrasMasAntiguos =
+    ( Ene, Feb )
 
 
 limDAC =
