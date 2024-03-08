@@ -1,4 +1,4 @@
-module Main exposing (main)
+module Main exposing (..)
 
 -- * Imports
 
@@ -46,11 +46,11 @@ main =
                 ]
             ]
             [ grafica |> HtmlS.fromUnstyled ]
-
-        {- , HtmlS.div
-           [ css [ Tw.text_3xl, Tw.text_color Theme.lime_800 ] ]
-           [ HtmlS.text (Debug.toString listadoLargoDeBimestres) ]
-        -}
+        , HtmlS.div
+            [ css [ Tw.text_3xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
+            [ HtmlS.text (Debug.toString (getMesNum Ene))
+            , HtmlS.br [] []
+            ]
         ]
         |> HtmlS.toUnstyled
 
@@ -59,10 +59,59 @@ main =
 -- * Valores Generales
 
 
+type Mes
+    = Ene
+    | Feb
+    | Mar
+    | Abr
+    | May
+    | Jun
+    | Jul
+    | Ago
+    | Sep
+    | Oct
+    | Nov
+    | Dic
+
+
 meses : Array String
 meses =
     Array.fromList
         [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
+
+
+mesesT : Array Mes
+mesesT =
+    Array.fromList
+        [ Ene, Feb, Mar, Abr, May, Jun, Jul, Ago, Sep, Oct, Nov, Dic ]
+
+
+
+-- getMesNum : Mes -> Int
+
+
+getMesNum cualMes =
+    Array.indexedMap
+        (\indice mes ->
+            if mes == cualMes then
+                indice + 1
+
+            else
+                0
+        )
+        mesesT
+        |> Array.toList
+        |> List.sum
+
+
+bimestresDeHistorial : Int
+bimestresDeHistorial =
+    12
+
+
+bimestrasMasAntiguos : ( Mes, Mes )
+bimestrasMasAntiguos =
+    ( Ene, Feb )
 
 
 limDAC =
@@ -86,27 +135,37 @@ genera =
 -- * Valores Particulares
 
 
+saltaUnMes : Bool
 saltaUnMes =
     True
 
 
+paneles : Float
 paneles =
-    12
+    8
 
 
 capPanelesWatts =
-    580
+    545
 
 
 consumoPaAtras : List Int
 consumoPaAtras =
-    [ 1266, 3807, 3186, 1847, 1011, 1086, 1263, 3032, 3963, 3097, 1098, 1335 ]
+    [ 456, 1138, 2067, 1559, 897, 598, 452, 1097, 1874, 1960, 1332, 471 ]
         |> List.reverse
+
+
+
+-- bimestre más antiguo que aparece en el historial de consumo
 
 
 bimestreUltimo : Int
 bimestreUltimo =
-    1112
+    12
+
+
+
+-- del bimestre último capturado
 
 
 esteCaso : Bimestre
