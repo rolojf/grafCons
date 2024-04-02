@@ -111,9 +111,9 @@ bimestresDeHistorial =
     12
 
 
-bimestresMasAntiguos : ( Mes, Mes )
-bimestresMasAntiguos =
-    ( Ago, Oct )
+mesMasAntiguo : Mes
+mesMasAntiguo =
+    Ago
 
 
 limDAC =
@@ -153,7 +153,8 @@ capPanelesWatts =
 
 consumoPaAtras : List Int
 consumoPaAtras =
-    [ 456, 1138, 2067, 1559, 897, 598, 452, 1097, 1874, 1960, 1332, 471 ]
+    [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ]
+        --    [ 456, 1138, 2067, 1559, 897, 598, 452, 1097, 1874, 1960, 1332, 471 ]
         |> List.reverse
 
 
@@ -176,6 +177,7 @@ esteCaso =
 
 
 
+-- * Nueva construcción de listados
 -- * Construcción de listados de bimestres
 
 
