@@ -74,24 +74,22 @@ type Mes
     | Dic
 
 
-mesesTx : Array String
-mesesTx =
+meses : Array String
+meses =
     Array.fromList
         [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
 
 
-mesesTy : Array Mes
-mesesTy =
+mesesT : Array Mes
+mesesT =
     Array.fromList
         [ Ene, Feb, Mar, Abr, May, Jun, Jul, Ago, Sep, Oct, Nov, Dic ]
 
 
-parcial : Float
-parcial =
-    18 / 31
+
+-- getMesNum : Mes -> Int
 
 
-getMesNum : Mes -> Int
 getMesNum cualMes =
     Array.indexedMap
         (\indice mes ->
@@ -101,7 +99,7 @@ getMesNum cualMes =
             else
                 0
         )
-        mesesTy
+        mesesT
         |> Array.toList
         |> List.sum
 
@@ -111,9 +109,9 @@ bimestresDeHistorial =
     12
 
 
-bimestresMasAntiguos : ( Mes, Mes )
-bimestresMasAntiguos =
-    ( Ago, Oct )
+bimestrasMasAntiguos : ( Mes, Mes )
+bimestrasMasAntiguos =
+    ( Ene, Feb )
 
 
 limDAC =
@@ -376,7 +374,7 @@ grafica =
                         Maybe.withDefault "Ene"
                             (Array.get
                                 (valor * 2 - 2)
-                                mesesTx
+                                meses
                             )
                     ]
                 ]
