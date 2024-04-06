@@ -39,6 +39,7 @@ suite2 =
             { mes = Main.Ene, anio = 2024 }
     in
     describe "Probando la funcion que regresa el siguiente mes"
-        [ test "Marzo" (\_ -> Expect.equal (Main.mesAnioSig marzo) abril)
-        , test "Diciembre" (\_ -> Expect.equal (Main.mesAnioSig diciembre) enero)
+        [ test "MesAnio Marzo" (\_ -> Expect.equal (Main.mesAnioSig marzo) abril)
+        , test "MesAnio Diciembre" (\_ -> Expect.equal (Main.mesAnioSig diciembre) enero)
+        , test "Conviete a comparable" (\_ -> Expect.equal (Main.convierteLlave abril) ( "Abr", 2022 ))
         ]

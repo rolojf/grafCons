@@ -9,6 +9,7 @@ import Chart.Events as CE
 import Chart.Item as CI
 import Css.Global
 import Dict exposing (Dict)
+import Dict.Any as Any
 import FormatNumber exposing (format)
 import FormatNumber.Locales exposing (usLocale)
 import Html exposing (Html)
@@ -83,11 +84,6 @@ type Mes
     | Oct
     | Nov
     | Dic
-
-
-listaMesesTx : List String
-listaMesesTx =
-    [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
 
 
 mesesTx : Array String
@@ -222,7 +218,8 @@ esteCaso =
 
 
 
--- * Nueva construcción de listados
+-- * Construcción de listados
+-- ** Version Nueva CL
 
 
 mesAnioSig : MesAnio -> MesAnio
@@ -242,8 +239,22 @@ mesAnioSig anterior =
     }
 
 
+listaMesesTx : List String
+listaMesesTx =
+    [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
 
--- * Construcción de listados de bimestres
+
+convierteLlave : MesAnio -> ( String, Int )
+convierteLlave monthYear =
+    ( getMesTxt monthYear.mes
+    , monthYear.anio
+    )
+
+
+
+-- anyDictBase : Any.AnyDict comparable MesAnio Int
+-- anyDictBase =
+-- ** Version Anterior CL
 
 
 bimestresParNon : List Int
@@ -302,7 +313,10 @@ seQuedanBimestres =
 
 
 
--- * Repartición del consumo
+-- * Repartición del Consumo
+-- ** Versioń Nueva RC
+--reparteAMeses : Mes ->
+-- ** Versión Anterior RC
 
 
 consumoEnOrden : List ( Int, Int )
