@@ -46,11 +46,13 @@ main =
                 ]
             ]
             [ grafica |> HtmlS.fromUnstyled ]
-        , HtmlS.div
-            [ css [ Tw.text_3xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
-            [ HtmlS.text (Debug.toString (getMesNum Ene))
-            , HtmlS.br [] []
-            ]
+
+        {- , HtmlS.div
+           [ css [ Tw.text_3xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
+           [ HtmlS.text <| Debug.toString
+           , HtmlS.br [] []
+           ]
+        -}
         ]
         |> HtmlS.toUnstyled
 
@@ -74,16 +76,24 @@ type Mes
     | Dic
 
 
+listaMesesTx : List String
+listaMesesTx =
+    [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
+
+
 mesesTx : Array String
 mesesTx =
-    Array.fromList
-        [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
+    Array.fromList listaMesesTx
 
 
 mesesTy : Array Mes
 mesesTy =
     Array.fromList
         [ Ene, Feb, Mar, Abr, May, Jun, Jul, Ago, Sep, Oct, Nov, Dic ]
+
+
+
+-- día de corte del primer mes del bimestre
 
 
 parcial : Float
@@ -106,6 +116,21 @@ getMesNum cualMes =
         |> List.sum
 
 
+getMesTxt : Mes -> String
+getMesTxt cualMes =
+    cualMes
+        |> getMesNum
+        |> (\x -> x - 1)
+        |> (\x -> Array.get x mesesTx)
+        |> Maybe.withDefault "Error"
+
+
+listadoDeMeses : List String
+listadoDeMeses =
+    List.repeat 3 listaMesesTx
+        |> List.concat
+
+
 bimestresDeHistorial : Int
 bimestresDeHistorial =
     12
@@ -114,6 +139,17 @@ bimestresDeHistorial =
 mesMasAntiguo : Mes
 mesMasAntiguo =
     Ago
+
+
+anioMasAntiguo : Int
+anioMasAntiguo =
+    2022
+
+
+type alias MesAnio =
+    { mes : Mes
+    , anio : Int
+    }
 
 
 limDAC =
@@ -154,7 +190,6 @@ capPanelesWatts =
 consumoPaAtras : List Int
 consumoPaAtras =
     [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ]
-        --    [ 456, 1138, 2067, 1559, 897, 598, 452, 1097, 1874, 1960, 1332, 471 ]
         |> List.reverse
 
 
@@ -178,6 +213,26 @@ esteCaso =
 
 
 -- * Nueva construcción de listados
+
+
+mesAnioSig : MesAnio -> MesAnio
+mesAnioSig anterior =
+    { mes =
+        if anterior.mes == Dic then
+            Ene
+
+        else
+            Array.get (getMesNum anterior.mes) mesesTy |> Maybe.withDefault Nov
+    , anio =
+        if anterior.mes == Dic then
+            anterior.anio + 1
+
+        else
+            anterior.anio
+    }
+
+
+
 -- * Construcción de listados de bimestres
 
 
