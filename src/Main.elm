@@ -59,6 +59,15 @@ main =
 
 
 -- * Valores Generales
+-- generación de 4 paneles de 595w = 2.38kW
+
+
+genera =
+    [ 245, 259, 331, 337, 366, 367, 379, 374, 311, 287, 247, 233 ] |> Array.fromList
+
+
+
+-- ** Nueva Versión VG
 
 
 type Mes
@@ -92,15 +101,6 @@ mesesTy =
         [ Ene, Feb, Mar, Abr, May, Jun, Jul, Ago, Sep, Oct, Nov, Dic ]
 
 
-
--- día de corte del primer mes del bimestre
-
-
-parcial : Float
-parcial =
-    18 / 31
-
-
 getMesNum : Mes -> Int
 getMesNum cualMes =
     Array.indexedMap
@@ -131,6 +131,54 @@ listadoDeMeses =
         |> List.concat
 
 
+type alias MesAnio =
+    { mes : Mes
+    , anio : Int
+    }
+
+
+
+-- ** Nueva Anterior VA
+
+
+type Bimestre
+    = ParNon
+    | NonPar
+
+
+
+-- * Valores Particulares
+
+
+paneles : Float
+paneles =
+    8
+
+
+limDAC =
+    850
+
+
+capPanelesWatts =
+    545
+
+
+consumoPaAtras : List Int
+consumoPaAtras =
+    [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ]
+        |> List.reverse
+
+
+
+-- ** Nueva versión
+-- día de corte del primer mes del bimestre
+
+
+parcial : Float
+parcial =
+    18 / 31
+
+
 bimestresDeHistorial : Int
 bimestresDeHistorial =
     12
@@ -146,51 +194,13 @@ anioMasAntiguo =
     2022
 
 
-type alias MesAnio =
-    { mes : Mes
-    , anio : Int
-    }
 
-
-limDAC =
-    850
-
-
-type Bimestre
-    = ParNon
-    | NonPar
-
-
-
--- generación de 4 paneles de 595w = 2.38kW
-
-
-genera =
-    [ 245, 259, 331, 337, 366, 367, 379, 374, 311, 287, 247, 233 ] |> Array.fromList
-
-
-
--- * Valores Particulares
+-- ** Versión anterior
 
 
 saltaUnMes : Bool
 saltaUnMes =
     True
-
-
-paneles : Float
-paneles =
-    8
-
-
-capPanelesWatts =
-    545
-
-
-consumoPaAtras : List Int
-consumoPaAtras =
-    [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ]
-        |> List.reverse
 
 
 
