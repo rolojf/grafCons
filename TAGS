@@ -1,57 +1,57 @@
 
-src/Main.elm,1708
+src/Main.elm,1714
 module MainMain1,0
-main =main33,770
--- generación de 4 paneles de 595w =--63,1416
-genera =genera66,1463
-type MesMes74,1586
-    = EneEne75,1595
-    | FebFeb76,1605
-    | MarMar77,1615
-    | AbrAbr78,1625
-    | MayMay79,1635
-    | JunJun80,1645
-    | JulJul81,1655
-    | AgoAgo82,1665
-    | SepSep83,1675
-    | OctOct84,1685
-    | NovNov85,1695
-    | DicDic86,1705
-mesesTx =mesesTx90,1740
-mesesTy =mesesTy95,1804
-getMesNum cualMes =getMesNum101,1929
-getMesTxt cualMes =getMesTxt116,2190
-listadoDeMeses =listadoDeMeses125,2375
-type alias MesAnio =type130,2448
-type alias MesAnioMesAnio130,2448
-type BimestreBimestre140,2537
-    = ParNonParNon141,2551
-    | NonParNonPar142,2564
-paneles =paneles150,2624
-limDAC =limDAC154,2642
-capPanelesWatts =capPanelesWatts158,2661
-consumoPaAtras =consumoPaAtras163,2715
-parcial =parcial174,2915
-bimestresDeHistorial =bimestresDeHistorial179,2966
-mesMasAntiguo =mesMasAntiguo184,3018
-anioMasAntiguo =anioMasAntiguo189,3065
-saltaUnMes =saltaUnMes198,3138
-bimestreUltimo =bimestreUltimo207,3250
-esteCaso =esteCaso216,3333
-mesAnioSig anterior =mesAnioSig226,3446
-listaMesesTx =listaMesesTx243,3780
-convierteLlave monthYear =convierteLlave248,3932
--- anyDictBase =--256,4071
-bimestresParNon =bimestresParNon261,4143
-bimestresNonPar =bimestresNonPar266,4225
-listadoqueAplica =listadoqueAplica271,4308
-listadoLargoDeBimestres =listadoLargoDeBimestres287,4617
-seQuedanBimestres =seQuedanBimestres297,4846
-consumoEnOrden =consumoEnOrden323,5404
-consumoPenultimoA =consumoPenultimoA328,5532
-consumoUltimoA =consumoUltimoA333,5632
-consumo =consumo337,5699
-grafica =grafica444,8703
+main =main34,815
+-- generación de 4 paneles de 595w =--62,1462
+genera =genera65,1509
+type MesMes73,1632
+    = EneEne74,1641
+    | FebFeb75,1651
+    | MarMar76,1661
+    | AbrAbr77,1671
+    | MayMay78,1681
+    | JunJun79,1691
+    | JulJul80,1701
+    | AgoAgo81,1711
+    | SepSep82,1721
+    | OctOct83,1731
+    | NovNov84,1741
+    | DicDic85,1751
+mesesTx =mesesTx89,1786
+mesesTy =mesesTy94,1850
+getMesNum cualMes =getMesNum100,1975
+getMesTxt cualMes =getMesTxt115,2236
+listadoDeMeses =listadoDeMeses124,2421
+type alias MesAnio =type129,2494
+type alias MesAnioMesAnio129,2494
+type BimestreBimestre139,2583
+    = ParNonParNon140,2597
+    | NonParNonPar141,2610
+paneles =paneles149,2670
+limDAC =limDAC153,2688
+capPanelesWatts =capPanelesWatts157,2707
+consumoPaAtras =consumoPaAtras162,2761
+parcial =parcial173,2961
+bimestresDeHistorial =bimestresDeHistorial178,3012
+mesMasAntiguo =mesMasAntiguo183,3064
+anioMasAntiguo =anioMasAntiguo188,3111
+saltaUnMes =saltaUnMes197,3184
+bimestreUltimo =bimestreUltimo206,3296
+esteCaso =esteCaso215,3379
+mesAnioSig anterior =mesAnioSig225,3492
+listaMesesTx =listaMesesTx242,3826
+convierteLlave monthYear =convierteLlave247,3978
+anyDictBase =anyDictBase254,4114
+bimestresParNon =bimestresParNon297,5138
+bimestresNonPar =bimestresNonPar302,5220
+listadoqueAplica =listadoqueAplica307,5303
+listadoLargoDeBimestres =listadoLargoDeBimestres323,5612
+seQuedanBimestres =seQuedanBimestres333,5841
+consumoEnOrden =consumoEnOrden359,6399
+consumoPenultimoA =consumoPenultimoA364,6527
+consumoUltimoA =consumoUltimoA369,6627
+consumo =consumo373,6694
+grafica =grafica480,9698
 
 node_modules/node-elm-compiler/examples/HelloWorld.elm,38
 module MainMain1,0

@@ -9,13 +9,14 @@ import Chart.Events as CE
 import Chart.Item as CI
 import Css.Global
 import Dict exposing (Dict)
-import Dict.Any as Any
+import Dict.Any as Any exposing (AnyDict)
 import FormatNumber exposing (format)
 import FormatNumber.Locales exposing (usLocale)
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Styled as HtmlS
 import Html.Styled.Attributes exposing (css)
+import List.Extra as List
 import Svg as S
 import Svg.Attributes as SA
 import Svg.Events as SE
@@ -47,13 +48,11 @@ main =
                 ]
             ]
             [ grafica |> HtmlS.fromUnstyled ]
-
-        {- , HtmlS.div
-           [ css [ Tw.text_3xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
-           [ HtmlS.text <| Debug.toString
-           , HtmlS.br [] []
-           ]
-        -}
+        , HtmlS.div
+            [ css [ Tw.text_3xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
+            [ HtmlS.text <| Debug.toString anyDictBase
+            , HtmlS.br [] []
+            ]
         ]
         |> HtmlS.toUnstyled
 
@@ -134,7 +133,7 @@ type alias MesAnio =
 
 
 
--- ** Nueva Anterior VA
+-- ** Nueva Anterior VG
 
 
 type Bimestre
@@ -251,9 +250,46 @@ convierteLlave monthYear =
     )
 
 
+anyDictBase : AnyDict ( String, Int ) MesAnio Int
+anyDictBase =
+    let
+        secMesesIdx : List Int
+        secMesesIdx =
+            List.range
+                (getMesNum mesMasAntiguo)
+                (bimestresDeHistorial * 2 + 1 + getMesNum mesMasAntiguo)
+                |> List.map
+                    (\x -> x - (((x - 1) // 12) * 12))
 
--- anyDictBase : Any.AnyDict comparable MesAnio Int
--- anyDictBase =
+        secMeses2 =
+            List.range
+                (getMesNum mesMasAntiguo)
+                (bimestresDeHistorial * 2 + 1 + getMesNum mesMasAntiguo)
+                |> List.map
+                    (\x -> (x - 1) // 12)
+
+        zipSec =
+            List.zip secMesesIdx secMeses2
+
+        _ =
+            Debug.log "zipSec" zipSec
+    in
+    List.map
+        (\( idx, addAnio ) ->
+            ( MesAnio
+                (Array.get (idx - 1) mesesTy
+                    |> Maybe.withDefault Nov
+                )
+                (anioMasAntiguo + addAnio)
+            , 0
+            )
+        )
+        zipSec
+        |> Any.fromList
+            convierteLlave
+
+
+
 -- ** Version Anterior CL
 
 
