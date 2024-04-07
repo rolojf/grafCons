@@ -50,7 +50,7 @@ main =
             [ grafica |> HtmlS.fromUnstyled ]
         , HtmlS.div
             [ css [ Tw.text_3xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
-            [ HtmlS.text <| Debug.toString anyDictBase
+            [ HtmlS.text <| Debug.toString secBimestres
             , HtmlS.br [] []
             ]
         ]
@@ -145,6 +145,11 @@ type Bimestre
 -- * Valores Particulares
 
 
+bimestresDeHistorial : Int
+bimestresDeHistorial =
+    12
+
+
 paneles : Float
 paneles =
     8
@@ -172,11 +177,6 @@ consumoPaAtras =
 parcial : Float
 parcial =
     18 / 31
-
-
-bimestresDeHistorial : Int
-bimestresDeHistorial =
-    12
 
 
 mesMasAntiguo : Mes
@@ -287,6 +287,23 @@ anyDictBase =
         zipSec
         |> Any.fromList
             convierteLlave
+
+
+secBimestres : Array MesAnio
+secBimestres =
+    List.foldl
+        (\_ acVeces ->
+            case List.head acVeces of
+                Nothing ->
+                    MesAnio Nov 9999 :: acVeces
+
+                Just ma ->
+                    (mesAnioSig ma |> mesAnioSig) :: acVeces
+        )
+        [ MesAnio mesMasAntiguo anioMasAntiguo ]
+        (List.repeat bimestresDeHistorial 1)
+        |> List.reverse
+        |> Array.fromList
 
 
 
