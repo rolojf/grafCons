@@ -49,8 +49,8 @@ main =
             ]
             [ grafica |> HtmlS.fromUnstyled ]
         , HtmlS.div
-            [ css [ Tw.text_3xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
-            [ HtmlS.text <| Debug.toString secBimestres
+            [ css [ Tw.text_2xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
+            [ HtmlS.text <| Debug.toString unoDict
             , HtmlS.br [] []
             ]
         ]
@@ -368,7 +368,40 @@ seQuedanBimestres =
 
 -- * Repartición del Consumo
 -- ** Versioń Nueva RC
---reparteAMeses : Mes ->
+
+
+reparteAMeses : Int -> MesAnio -> AnyDict comparable MesAnio Int -> AnyDict comparable MesAnio Int
+reparteAMeses consumoDelBim mesInicDelBim elDict =
+    let
+        uno =
+            round <| (1 - parcial) * 30.0 * toFloat consumoDelBim / 61
+
+        dos =
+            round <| 31.0 * toFloat consumoDelBim / 61
+
+        tres =
+            round <| parcial * 30.0 * toFloat consumoDelBim / 61
+    in
+    elDict
+        |> Any.update
+            mesInicDelBim
+            (Maybe.map ((+) uno))
+        |> Any.update
+            (mesAnioSig mesInicDelBim)
+            (Maybe.map ((+) dos))
+        |> Any.update
+            (mesAnioSig (mesAnioSig mesInicDelBim))
+            (Maybe.map ((+) tres))
+
+
+unoDict =
+    anyDictBase
+        |> reparteAMeses
+            2000
+            (MesAnio Dic 2023)
+
+
+
 -- ** Versión Anterior RC
 
 
