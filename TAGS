@@ -1,31 +1,297 @@
 
-src/Main.elm,878
+src/Main.elm,1853
 module MainMain1,0
-main =main32,749
-meses =meses65,1432
-limDAC =limDAC70,1556
-type BimestreBimestre74,1575
-    = ParNonParNon75,1589
-    | NonParNonPar76,1602
--- generación de 4 paneles de 595w =--80,1618
-genera =genera83,1665
-saltaUnMes =saltaUnMes92,1808
-paneles =paneles97,1848
-capPanelesWatts =capPanelesWatts101,1866
-consumoPaAtras =consumoPaAtras106,1920
-bimestreUltimo =bimestreUltimo116,2125
-esteCaso =esteCaso125,2208
-bimestresParNon =bimestresParNon134,2306
-bimestresNonPar =bimestresNonPar139,2388
-listadoqueAplica =listadoqueAplica144,2471
-listadoLargoDeBimestres =listadoLargoDeBimestres160,2780
-seQuedanBimestres =seQuedanBimestres170,3009
-consumoEnOrden =consumoEnOrden193,3491
-consumoPenultimoA =consumoPenultimoA198,3619
-consumoUltimoA =consumoUltimoA203,3719
-consumo =consumo207,3786
-grafica =grafica314,6790
+main =main34,815
+-- generación de 4 paneles de 595w =--62,1458
+genera =genera65,1505
+type MesMes73,1628
+    = EneEne74,1637
+    | FebFeb75,1647
+    | MarMar76,1657
+    | AbrAbr77,1667
+    | MayMay78,1677
+    | JunJun79,1687
+    | JulJul80,1697
+    | AgoAgo81,1707
+    | SepSep82,1717
+    | OctOct83,1727
+    | NovNov84,1737
+    | DicDic85,1747
+mesesTx =mesesTx89,1782
+mesesTy =mesesTy94,1846
+getMesNum cualMes =getMesNum100,1971
+getMesTxt cualMes =getMesTxt115,2232
+listadoDeMeses =listadoDeMeses124,2417
+type alias MesAnio =type129,2490
+type alias MesAnioMesAnio129,2490
+type BimestreBimestre139,2579
+    = ParNonParNon140,2593
+    | NonParNonPar141,2606
+bimestresDeHistorial =bimestresDeHistorial149,2677
+paneles =paneles154,2725
+limDAC =limDAC158,2743
+capPanelesWatts =capPanelesWatts162,2762
+consumoPaAtras =consumoPaAtras167,2816
+parcial =parcial178,3016
+mesMasAntiguo =mesMasAntiguo183,3060
+anioMasAntiguo =anioMasAntiguo188,3107
+saltaUnMes =saltaUnMes197,3180
+bimestreUltimo =bimestreUltimo206,3292
+esteCaso =esteCaso215,3375
+mesAnioSig anterior =mesAnioSig225,3488
+listaMesesTx =listaMesesTx242,3822
+convierteLlave monthYear =convierteLlave247,3974
+anyDictBase =anyDictBase254,4110
+secBimestres =secBimestres293,5107
+bimestresParNon =bimestresParNon314,5574
+bimestresNonPar =bimestresNonPar319,5656
+listadoqueAplica =listadoqueAplica324,5739
+listadoLargoDeBimestres =listadoLargoDeBimestres340,6048
+seQuedanBimestres =seQuedanBimestres350,6277
+reparteAMeses consumoDelBim mesInicDelBim elDict =reparteAMeses374,6847
+unoDict =unoDict397,7448
+consumoEnOrden =consumoEnOrden409,7614
+consumoPenultimoA =consumoPenultimoA414,7742
+consumoUltimoA =consumoUltimoA419,7842
+consumo =consumo423,7909
+grafica =grafica530,10913
 
 node_modules/node-elm-compiler/examples/HelloWorld.elm,38
 module MainMain1,0
 main =main7,79
+
+node_modules/elm-test/elm/src/Test/Reporter/Console/Format/Color.elm,202
+module Test.Reporter.Console.Format.ColorTest.Reporter.Console.Format.Color1,0
+formatEquality highlightedExpected highlightedActual =formatEquality8,296
+fromHighlightable =fromHighlightable24,739
+
+node_modules/elm-test/elm/src/Test/Reporter/Console/Format/Monochrome.elm,223
+module Test.Reporter.Console.Format.MonochromeTest.Reporter.Console.Format.Monochrome1,0
+formatEquality highlightedExpected highlightedActual =formatEquality7,251
+fromHighlightable indicator =fromHighlightable35,1118
+
+node_modules/elm-test/elm/src/Test/Reporter/Console/Format.elm,369
+module Test.Reporter.Console.FormatTest.Reporter.Console.Format1,0
+format formatEquality description reason =format12,356
+highlightEqual expected actual =highlightEqual82,2592
+isFloat str =isFloat140,4483
+listDiffToString index description { expected, actual } originals =listDiffToString155,4786
+verticalBar comparison expected actual =verticalBar205,6808
+
+node_modules/elm-test/elm/src/Test/Reporter/Console.elm,919
+module Test.Reporter.ConsoleTest.Reporter.Console1,0
+formatDuration time =formatDuration13,517
+indent str =indent18,602
+pluralize singular plural count =pluralize26,762
+todosToText ( labels, failure ) =todosToText39,1026
+todoLabelsToText =todoLabelsToText44,1166
+todoToChalk message =todoToChalk49,1316
+failuresToText useColor labels failures =failuresToText54,1451
+failureLabelsToText =failureLabelsToText59,1628
+failureToText useColor { given, description, reason } =failureToText64,1794
+textToValue useColor txt =textToValue89,2448
+reportBegin useColor { globs, fuzzRuns, testCount, initialSeed } =reportBegin96,2663
+reportComplete useColor { labels, outcome } =reportComplete113,3203
+summarizeTodos =summarizeTodos133,3800
+reportSummary useColor { todos, passed, failed, duration } autoFail =reportSummary138,3924
+stat label value =stat198,5836
+withChar icon str =withChar206,5980
+
+node_modules/elm-test/elm/src/Test/Reporter/Highlightable.elm,354
+module Test.Reporter.HighlightableTest.Reporter.Highlightable1,0
+type HighlightableHighlightable6,154
+    = HighlightedHighlighted7,175
+    | PlainPlain8,195
+resolve { fromHighlighted, fromPlain } highlightable =resolve12,294
+diffLists expected actual =diffLists22,539
+map transform highlightable =map29,753
+fromDiff diff =fromDiff39,980
+
+node_modules/elm-test/elm/src/Test/Reporter/Json.elm,591
+module Test.Reporter.JsonTest.Reporter.Json1,0
+reportBegin { globs, paths, fuzzRuns, testCount, initialSeed } =reportBegin9,416
+reportComplete { duration, labels, outcome } =reportComplete22,943
+encodeFailures outcome =encodeFailures33,1353
+getStatus outcome =getStatus53,1711
+encodeLabels labels =encodeLabels66,1904
+reportSummary { duration, passed, failed } autoFail =reportSummary72,2042
+encodeFailure { given, description, reason } =encodeFailure87,2553
+encodeReasonType reasonType data =encodeReasonType96,2866
+encodeReason description reason =encodeReason102,3029
+
+node_modules/elm-test/elm/src/Test/Reporter/JUnit.elm,612
+module Test.Reporter.JUnitTest.Reporter.JUnit1,0
+reportBegin _ =reportBegin9,325
+encodeOutcome outcome =encodeOutcome14,405
+encodeFailureTuple message =encodeFailureTuple33,870
+formatFailure { given, description, reason } =formatFailure38,976
+formatClassAndName labels =formatClassAndName52,1286
+encodeDuration time =encodeDuration62,1484
+reportComplete { labels, duration, outcome } =reportComplete69,1624
+encodeExtraFailure _ =encodeExtraFailure84,2013
+reportSummary { testCount, duration, failed } autoFail =reportSummary89,2161
+reasonToString description reason =reasonToString123,3498
+
+node_modules/elm-test/elm/src/Test/Reporter/Reporter.elm,391
+module Test.Reporter.ReporterTest.Reporter.Reporter1,0
+type ReportReport11,372
+    = ConsoleReportConsoleReport12,384
+    | JsonReportJsonReport13,413
+    | JUnitReportJUnitReport14,430
+type alias TestReporter =type17,450
+type alias TestReporterTestReporter17,450
+type alias RunInfo =type25,651
+type alias RunInfoRunInfo25,651
+createReporter report =createReporter35,839
+
+node_modules/elm-test/elm/src/Test/Reporter/TestResults.elm,678
+module Test.Reporter.TestResultsTest.Reporter.TestResults1,0
+type OutcomeOutcome15,266
+    = PassedPassed16,279
+    | TodoTodo17,292
+    | FailedFailed18,310
+type alias TestResult =type21,340
+type alias TestResultTestResult21,340
+type alias SummaryInfo =type28,463
+type alias SummaryInfoSummaryInfo28,463
+type alias Failure =type37,622
+type alias FailureFailure37,622
+isFailure outcome =isFailure45,755
+outcomesFromExpectations expectations =outcomesFromExpectations55,926
+type alias OutcomeBuilder =type95,2098
+type alias OutcomeBuilderOutcomeBuilder95,2098
+outcomesFromExpectationsHelp expectation builder =outcomesFromExpectationsHelp103,2288
+
+node_modules/elm-test/elm/src/Test/Runner/Node/Vendor/Console.elm,663
+module Test.Runner.Node.Vendor.ConsoleTest.Runner.Node.Vendor.Console1,0
+dark str =dark62,2561
+bold str =bold82,3033
+underline str =underline102,3465
+colorsInverted str =colorsInverted109,3661
+black str =black120,3830
+red str =red127,3963
+green str =green134,4098
+yellow str =yellow141,4237
+blue str =blue148,4373
+magenta str =magenta155,4513
+cyan str =cyan162,4650
+white str =white169,4786
+bgBlack str =bgBlack180,4944
+bgRed str =bgRed187,5076
+bgGreen str =bgGreen194,5210
+bgYellow str =bgYellow201,5348
+bgBlue str =bgBlue208,5483
+bgMagenta str =bgMagenta215,5622
+bgCyan str =bgCyan222,5758
+bgWhite str =bgWhite229,5893
+
+node_modules/elm-test/elm/src/Test/Runner/Node/Vendor/Diff.elm,831
+module Test.Runner.Node.Vendor.DiffTest.Runner.Node.Vendor.Diff1,0
+type ChangeChange65,2363
+    = AddedAdded66,2377
+    | RemovedRemoved67,2391
+    | NoChangeNoChange68,2407
+type StepResultStepResult71,2426
+    = ContinueContinue72,2442
+    | FoundFound73,2485
+type BugReportBugReport76,2519
+    = CannotGetACannotGetA77,2534
+    | CannotGetBCannotGetB78,2555
+    | UnexpectedPathUnexpectedPath79,2576
+diff a b =diff88,2781
+testDiff a b =testDiff101,3033
+makeChanges getA getB path =makeChanges136,3745
+makeChangesHelp changes getA getB ( x, y ) path =makeChangesHelp152,4078
+onp getA getB m n =onp200,5520
+onpLoopP snake_ delta offset p v =onpLoopP218,5871
+onpLoopK snake_ offset ks v =onpLoopK243,6515
+step snake_ offset k v =step263,6955
+snake getA getB nextX nextY path =snake307,8157
+
+node_modules/elm-test/elm/src/Test/Runner/JsMessage.elm,259
+module Test.Runner.JsMessageTest.Runner.JsMessage1,0
+type JsMessageJsMessage6,114
+    = TestTest7,129
+    | SummarySummary8,144
+decoder =decoder12,229
+decodeMessageFromType messageType =decodeMessageFromType18,379
+todoDecoder =todoDecoder35,896
+
+node_modules/elm-test/elm/src/Test/Runner/Node.elm,1044
+type alias TestId =type33,771
+type alias TestIdTestId33,771
+type alias InitArgs =type37,801
+type alias InitArgsInitArgs37,801
+type alias RunnerOptions =type48,1002
+type alias RunnerOptionsRunnerOptions48,1002
+type alias Model =type58,1167
+type alias ModelModel58,1167
+type alias TestProgram =type71,1478
+type alias TestProgramTestProgram71,1478
+type MsgMsg75,1540
+    = ReceiveReceive76,1549
+    | DispatchDispatch77,1576
+    | CompleteComplete78,1597
+dispatch model startTime =dispatch91,1935
+update msg ({ testReporter } as model) =update107,2438
+sendResults isFinished testReporter results =sendResults221,6620
+sendBegin model =sendBegin248,7383
+init { processes, globs, paths, fuzzRuns, initialSeed, report, runners } _ =init269,7930
+failInit message report _ =failInit319,9505
+check =check356,10574
+checkHelperReplaceMe___ _ =checkHelperReplaceMe___361,10645
+run { runs, seed, report, globs, paths, processes } possiblyTests =run368,10988
+noTestsFoundError globs =noTestsFoundError416,12520
+
+node_modules/elm-test/elm/src/Console/Text.elm,1139
+module Console.TextConsole.Text1,0
+type TextText20,262
+    = TextText21,272
+    | TextsTexts22,380
+type UseColorUseColor25,406
+    = UseColorUseColor26,420
+    | MonochromeMonochrome27,435
+type ColorColor30,454
+    = DefaultDefault31,465
+    | RedRed32,479
+    | GreenGreen33,489
+    | YellowYellow34,501
+    | BlackBlack35,514
+    | BlueBlue36,526
+    | MagentaMagenta37,537
+    | CyanCyan38,551
+    | WhiteWhite39,562
+type ColorModifierColorModifier42,576
+    = InvertedInverted43,595
+    | DarkDark44,610
+type StyleStyle47,623
+    = NormalNormal48,634
+    | BoldBold49,647
+    | UnderlineUnderline50,658
+render useColor txt =render54,712
+concat =concat74,1278
+plain =plain79,1322
+red =red88,1468
+green =green93,1583
+yellow =yellow98,1703
+dark txt =dark103,1821
+underline txt =underline117,2053
+colorizeForeground color str =colorizeForeground131,2303
+colorizeBackground color str =colorizeBackground162,2818
+applyStyle style str =applyStyle193,3341
+applyModifiers modifiers str =applyModifiers206,3576
+applyModifiersHelp modifier str =applyModifiersHelp211,3712
+
+node_modules/elm-test/templates/tests/Example.elm,47
+module ExampleExample1,0
+suite =suite9,157
+
+elm-stuff/generated-code/elm-community/elm-test/0.19.1-revision9/src/Test/Generated/Main.elm,70
+module Test.Generated.MainTest.Generated.Main1,0
+main =main11,229
+
+tests/Example.elm,94
+module ExampleExample1,0
+todos =todos10,163
+suite1 =suite118,247
+suite2 =suite227,573

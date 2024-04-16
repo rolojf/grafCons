@@ -9,12 +9,14 @@ import Chart.Events as CE
 import Chart.Item as CI
 import Css.Global
 import Dict exposing (Dict)
+import Dict.Any as Any exposing (AnyDict)
 import FormatNumber exposing (format)
 import FormatNumber.Locales exposing (usLocale)
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Styled as HtmlS
 import Html.Styled.Attributes exposing (css)
+import List.Extra as List
 import Svg as S
 import Svg.Attributes as SA
 import Svg.Events as SE
@@ -47,8 +49,8 @@ main =
             ]
             [ grafica |> HtmlS.fromUnstyled ]
         , HtmlS.div
-            [ css [ Tw.text_3xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
-            [ HtmlS.text (Debug.toString (getMesNum Ene))
+            [ css [ Tw.text_2xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
+            [ HtmlS.text <| Debug.toString unoDict
             , HtmlS.br [] []
             ]
         ]
@@ -57,6 +59,15 @@ main =
 
 
 -- * Valores Generales
+-- generación de 4 paneles de 595w = 2.38kW
+
+
+genera =
+    [ 245, 259, 331, 337, 366, 367, 379, 374, 311, 287, 247, 233 ] |> Array.fromList
+
+
+
+-- ** Nueva Versión VG
 
 
 type Mes
@@ -76,19 +87,13 @@ type Mes
 
 mesesTx : Array String
 mesesTx =
-    Array.fromList
-        [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
+    Array.fromList listaMesesTx
 
 
 mesesTy : Array Mes
 mesesTy =
     Array.fromList
         [ Ene, Feb, Mar, Abr, May, Jun, Jul, Ago, Sep, Oct, Nov, Dic ]
-
-
-parcial : Float
-parcial =
-    18 / 31
 
 
 getMesNum : Mes -> Int
@@ -106,18 +111,29 @@ getMesNum cualMes =
         |> List.sum
 
 
-bimestresDeHistorial : Int
-bimestresDeHistorial =
-    12
+getMesTxt : Mes -> String
+getMesTxt cualMes =
+    cualMes
+        |> getMesNum
+        |> (\x -> x - 1)
+        |> (\x -> Array.get x mesesTx)
+        |> Maybe.withDefault "Error"
 
 
-mesMasAntiguo : Mes
-mesMasAntiguo =
-    Ago
+listadoDeMeses : List String
+listadoDeMeses =
+    List.repeat 3 listaMesesTx
+        |> List.concat
 
 
-limDAC =
-    850
+type alias MesAnio =
+    { mes : Mes
+    , anio : Int
+    }
+
+
+
+-- ** Nueva Anterior VG
 
 
 type Bimestre
@@ -126,25 +142,21 @@ type Bimestre
 
 
 
--- generación de 4 paneles de 595w = 2.38kW
-
-
-genera =
-    [ 245, 259, 331, 337, 366, 367, 379, 374, 311, 287, 247, 233 ] |> Array.fromList
-
-
-
 -- * Valores Particulares
 
 
-saltaUnMes : Bool
-saltaUnMes =
-    True
+bimestresDeHistorial : Int
+bimestresDeHistorial =
+    12
 
 
 paneles : Float
 paneles =
     8
+
+
+limDAC =
+    850
 
 
 capPanelesWatts =
@@ -154,8 +166,36 @@ capPanelesWatts =
 consumoPaAtras : List Int
 consumoPaAtras =
     [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ]
-        --    [ 456, 1138, 2067, 1559, 897, 598, 452, 1097, 1874, 1960, 1332, 471 ]
         |> List.reverse
+
+
+
+-- ** Nueva versión
+-- día de corte del primer mes del bimestre
+
+
+parcial : Float
+parcial =
+    18 / 31
+
+
+mesMasAntiguo : Mes
+mesMasAntiguo =
+    Ago
+
+
+anioMasAntiguo : Int
+anioMasAntiguo =
+    2022
+
+
+
+-- ** Versión anterior
+
+
+saltaUnMes : Bool
+saltaUnMes =
+    True
 
 
 
@@ -177,8 +217,97 @@ esteCaso =
 
 
 
--- * Nueva construcción de listados
--- * Construcción de listados de bimestres
+-- * Construcción de listados
+-- ** Version Nueva CL
+
+
+mesAnioSig : MesAnio -> MesAnio
+mesAnioSig anterior =
+    { mes =
+        if anterior.mes == Dic then
+            Ene
+
+        else
+            Array.get (getMesNum anterior.mes) mesesTy |> Maybe.withDefault Nov
+    , anio =
+        if anterior.mes == Dic then
+            anterior.anio + 1
+
+        else
+            anterior.anio
+    }
+
+
+listaMesesTx : List String
+listaMesesTx =
+    [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
+
+
+convierteLlave : MesAnio -> ( String, Int )
+convierteLlave monthYear =
+    ( getMesTxt monthYear.mes
+    , monthYear.anio
+    )
+
+
+anyDictBase : AnyDict ( String, Int ) MesAnio Int
+anyDictBase =
+    let
+        secMesesIdx : List Int
+        secMesesIdx =
+            List.range
+                (getMesNum mesMasAntiguo)
+                (bimestresDeHistorial * 2 + 1 + getMesNum mesMasAntiguo)
+                |> List.map
+                    (\x -> x - (((x - 1) // 12) * 12))
+
+        secMeses2 =
+            List.range
+                (getMesNum mesMasAntiguo)
+                (bimestresDeHistorial * 2 + 1 + getMesNum mesMasAntiguo)
+                |> List.map
+                    (\x -> (x - 1) // 12)
+
+        zipSec =
+            List.zip secMesesIdx secMeses2
+
+        _ =
+            Debug.log "zipSec" zipSec
+    in
+    List.map
+        (\( idx, addAnio ) ->
+            ( MesAnio
+                (Array.get (idx - 1) mesesTy
+                    |> Maybe.withDefault Nov
+                )
+                (anioMasAntiguo + addAnio)
+            , 0
+            )
+        )
+        zipSec
+        |> Any.fromList
+            convierteLlave
+
+
+secBimestres : Array MesAnio
+secBimestres =
+    List.foldl
+        (\_ acVeces ->
+            case List.head acVeces of
+                Nothing ->
+                    MesAnio Nov 9999 :: acVeces
+
+                Just ma ->
+                    (mesAnioSig ma |> mesAnioSig) :: acVeces
+        )
+        [ MesAnio mesMasAntiguo anioMasAntiguo ]
+        (List.repeat bimestresDeHistorial 1)
+        |> List.reverse
+        |> Array.fromList
+
+
+
+-- ** Version Anterior CL
 
 
 bimestresParNon : List Int
@@ -237,7 +366,43 @@ seQuedanBimestres =
 
 
 
--- * Repartición del consumo
+-- * Repartición del Consumo
+-- ** Versioń Nueva RC
+
+
+reparteAMeses : Int -> MesAnio -> AnyDict comparable MesAnio Int -> AnyDict comparable MesAnio Int
+reparteAMeses consumoDelBim mesInicDelBim elDict =
+    let
+        uno =
+            round <| (1 - parcial) * 30.0 * toFloat consumoDelBim / 61
+
+        dos =
+            round <| 31.0 * toFloat consumoDelBim / 61
+
+        tres =
+            round <| parcial * 30.0 * toFloat consumoDelBim / 61
+    in
+    elDict
+        |> Any.update
+            mesInicDelBim
+            (Maybe.map ((+) uno))
+        |> Any.update
+            (mesAnioSig mesInicDelBim)
+            (Maybe.map ((+) dos))
+        |> Any.update
+            (mesAnioSig (mesAnioSig mesInicDelBim))
+            (Maybe.map ((+) tres))
+
+
+unoDict =
+    anyDictBase
+        |> reparteAMeses
+            2000
+            (MesAnio Dic 2023)
+
+
+
+-- ** Versión Anterior RC
 
 
 consumoEnOrden : List ( Int, Int )
