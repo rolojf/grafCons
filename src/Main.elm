@@ -51,7 +51,7 @@ main =
             [ grafica |> HtmlS.fromUnstyled ]
         , HtmlS.div
             [ css [ Tw.text_2xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
-            [ HtmlS.text <| Debug.toString secBimCons
+            [ HtmlS.text <| Debug.toString reparteConsumo
             , HtmlS.br [] []
             ]
         ]
@@ -253,7 +253,7 @@ convierteLlave monthYear =
     )
 
 
-anyDictBase : AnyDict ( String, Int ) MesAnio Int
+anyDictBase : AnyDict LlaveComparable MesAnio Int
 anyDictBase =
     let
         secMesesIdx : List Int
@@ -392,7 +392,7 @@ reparteAMeses consumoDelBim mesInicDelBim elDict =
             round <| 31.0 * toFloat consumoDelBim / 61
 
         tres =
-            round <| parcial * 30.0 * toFloat consumoDelBim / 61
+            consumoDelBim - uno - dos
     in
     elDict
         |> Any.update
@@ -412,15 +412,17 @@ unoDict =
             2000
             (MesAnio Dic 2023)
 
-{-reparteConsumo : AnyDict LlaveComparable MesAnio Int
+reparteConsumo : AnyDict LlaveComparable MesAnio Int
 reparteConsumo =
     Array.foldl
-        (\elMA elDic ->
+        (\cadaElem elDic ->
             elDic
             |> reparteAMeses
-
+                   (Tuple.second cadaElem)
+                   (Tuple.first cadaElem)
         )
--}
+        anyDictBase
+        secBimCons
 
 -- ** Versión Anterior RC
 
