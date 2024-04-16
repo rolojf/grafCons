@@ -3,6 +3,7 @@ module Main exposing (..)
 -- * Imports
 
 import Array exposing (Array)
+import Array.Extra as Array
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
@@ -50,7 +51,7 @@ main =
             [ grafica |> HtmlS.fromUnstyled ]
         , HtmlS.div
             [ css [ Tw.text_2xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
-            [ HtmlS.text <| Debug.toString unoDict
+            [ HtmlS.text <| Debug.toString secBimCons
             , HtmlS.br [] []
             ]
         ]
@@ -243,7 +244,9 @@ listaMesesTx =
     [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
 
 
-convierteLlave : MesAnio -> ( String, Int )
+type alias LlaveComparable = ( String, Int )
+
+convierteLlave : MesAnio -> LlaveComparable
 convierteLlave monthYear =
     ( getMesTxt monthYear.mes
     , monthYear.anio
@@ -305,6 +308,15 @@ secBimestres =
         |> List.reverse
         |> Array.fromList
 
+secBimCons : Array (MesAnio, Int)
+secBimCons =
+    let
+        consumoArray = Array.fromList consumoPaAtras
+    in
+           Array.map2
+                (\bim cons -> (bim, cons))
+                secBimestres
+                consumoArray
 
 
 -- ** Version Anterior CL
@@ -370,7 +382,7 @@ seQuedanBimestres =
 -- ** Versioń Nueva RC
 
 
-reparteAMeses : Int -> MesAnio -> AnyDict comparable MesAnio Int -> AnyDict comparable MesAnio Int
+reparteAMeses : Int -> MesAnio -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
 reparteAMeses consumoDelBim mesInicDelBim elDict =
     let
         uno =
@@ -400,7 +412,15 @@ unoDict =
             2000
             (MesAnio Dic 2023)
 
+{-reparteConsumo : AnyDict LlaveComparable MesAnio Int
+reparteConsumo =
+    Array.foldl
+        (\elMA elDic ->
+            elDic
+            |> reparteAMeses
 
+        )
+-}
 
 -- ** Versión Anterior RC
 
