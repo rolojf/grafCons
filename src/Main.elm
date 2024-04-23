@@ -50,7 +50,7 @@ main =
             [ grafica |> HtmlS.fromUnstyled ]
         , HtmlS.div
             [ css [ Tw.text_2xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
-            [ HtmlS.text <| Debug.toString <| subRepartido (MesAnio Mar 2023) anyDictBase
+            [ HtmlS.text <| Debug.toString reparteSub --<| subRepartido (MesAnio Mar 2023) anyDictBase
             , HtmlS.br [] []
             ]
         ]
@@ -439,8 +439,8 @@ subMes mes =
         450
 
 
-subRepartido : MesAnio -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
-subRepartido mesInicDelBim elDict =
+reparteSubAMeses : MesAnio -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
+reparteSubAMeses mesInicDelBim elDict =
     let
         uno =
             (mesInicDelBim.mes |> getMesNum |> subMes |> toFloat) * (1 - parcial) |> round
@@ -555,6 +555,18 @@ consumo =
       , gen = obtenGenera 11 12
       }
     ]
+
+
+reparteSub : AnyDict LlaveComparable MesAnio Int
+reparteSub =
+    Array.foldl
+        (\cadaElem elDic ->
+            elDic
+                |> reparteSubAMeses
+                    (Tuple.first cadaElem)
+        )
+        anyDictBase
+        secBimCons
 
 
 
