@@ -48,32 +48,25 @@ main =
                 ]
             ]
             [ grafica |> HtmlS.fromUnstyled ]
-        , HtmlS.div
-            [ css [ Tw.text_2xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
-            [ HtmlS.text <| Debug.toString <| reparteConsumo
-            , HtmlS.br [] []
-            , HtmlS.br [] []
-            , HtmlS.text <| Debug.toString <| obtnPrimerBim May
-            , HtmlS.br [] []
-            , HtmlS.br [] []
-            , HtmlS.text <| Debug.toString <| obtnSegundoBim May
-            , HtmlS.br [] []
-            ]
+
+        {- , HtmlS.div
+           [ css [ Tw.text_2xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
+           [ HtmlS.text <| Debug.toString <| obtenSubsidio 0 6
+           , HtmlS.br [] []
+           , HtmlS.br [] []
+           ]
+        -}
         ]
         |> HtmlS.toUnstyled
 
 
 
 -- * Valores Generales
--- generación de 4 paneles de 595w = 2.38kW
 
 
 genera =
+    -- generación de 4 paneles de 595w = 2.38kW
     [ 245, 259, 331, 337, 366, 367, 379, 374, 311, 287, 247, 233 ] |> Array.fromList
-
-
-
--- ** Nueva Versión VG
 
 
 type Mes
@@ -139,15 +132,6 @@ type alias MesAnio =
 
 
 
--- ** Nueva Anterior VG
-
-
-type Bimestre
-    = ParNon
-    | NonPar
-
-
-
 -- * Valores Particulares
 
 
@@ -158,7 +142,7 @@ bimestresDeHistorial =
 
 paneles : Float
 paneles =
-    8
+    7
 
 
 limDAC =
@@ -166,18 +150,13 @@ limDAC =
 
 
 capPanelesWatts =
-    545
+    595
 
 
 consumoPaAtras : List Int
 consumoPaAtras =
     [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ]
         |> List.reverse
-
-
-
--- ** Nueva versión
--- día de corte del primer mes del bimestre
 
 
 parcial : Float
@@ -196,35 +175,7 @@ anioMasAntiguo =
 
 
 
--- ** Versión anterior
-
-
-saltaUnMes : Bool
-saltaUnMes =
-    True
-
-
-
--- bimestre más antiguo que aparece en el historial de consumo
-
-
-bimestreUltimo : Int
-bimestreUltimo =
-    12
-
-
-
--- del bimestre último capturado
-
-
-esteCaso : Bimestre
-esteCaso =
-    NonPar
-
-
-
 -- * Construcción de listados
--- ** Version Nueva CL
 
 
 mesAnioSig : MesAnio -> MesAnio
@@ -338,67 +289,7 @@ secBimCons =
 
 
 
--- ** Version Anterior CL
-
-
-bimestresParNon : List Int
-bimestresParNon =
-    [ 23, 45, 67, 89, 1011, 1201 ]
-
-
-bimestresNonPar : List Int
-bimestresNonPar =
-    [ 12, 34, 56, 78, 910, 1112 ]
-
-
-listadoqueAplica : Array Int
-listadoqueAplica =
-    (case esteCaso of
-        ParNon ->
-            bimestresParNon
-
-        NonPar ->
-            bimestresNonPar
-    )
-        |> Array.fromList
-
-
-
--- construyo un listado largo (3x) de bimestres solo para ver que meses voy a sacar para cada bimestre
-
-
-listadoLargoDeBimestres : List Int
-listadoLargoDeBimestres =
-    case esteCaso of
-        ParNon ->
-            List.repeat 3 bimestresParNon |> List.concat
-
-        NonPar ->
-            List.repeat 3 bimestresNonPar |> List.concat
-
-
-seQuedanBimestres : List Int
-seQuedanBimestres =
-    let
-        checaSi : Int -> List Int -> List Int
-        checaSi valor listaAcum =
-            if List.length listaAcum == 0 then
-                if valor == bimestreUltimo then
-                    [ valor ]
-
-                else
-                    []
-
-            else
-                valor :: listaAcum
-    in
-    List.foldl checaSi [] listadoLargoDeBimestres
-        |> List.reverse
-
-
-
 -- * Repartición del Consumo
--- ** Versioń Nueva RC
 
 
 reparteAMeses : Int -> MesAnio -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
@@ -445,44 +336,32 @@ reparteConsumo =
         secBimCons
 
 
-subMes : Int -> Int
-subMes mes =
-    if mes < 4 || mes > 9 then
-        175
+subMes : Maybe Mes -> Int
+subMes mmes =
+    case mmes of
+        Just month ->
+            if List.member month [ Ene, Feb, Mar, Oct, Nov, Dic ] then
+                175
 
-    else
-        450
+            else
+                450
 
-
-subRepartido : MesAnio -> Int
-subRepartido mesInicDelBim =
-    let
-        uno =
-            (mesInicDelBim.mes |> getMesNum |> subMes |> toFloat) * (1 - parcial) |> round
-
-        dos =
-            mesInicDelBim |> mesAnioSig |> .mes |> getMesNum |> subMes
-
-        tres =
-            (mesInicDelBim |> mesAnioSig |> mesAnioSig |> .mes |> getMesNum |> subMes |> toFloat) * parcial |> round
-    in
-    uno + dos + tres
+        Nothing ->
+            99999
 
 
-mesBimPrevio : Mes -> Mes
-mesBimPrevio =
-    if parcial <= 0.5 then
-        mesAnt >> mesAnt
-
-    else
-        mesAnt >> mesAnt >> mesAnt
+obtenSubsidio : Int -> Int -> Float
+obtenSubsidio mes1 mes2 =
+    subMes (Array.get (mes1 - 1) mesesTy)
+        + subMes (Array.get (mes2 - 1) mesesTy)
+        |> toFloat
 
 
 obtnPrimerBim : Mes -> Int
 obtnPrimerBim mes =
     case
         Any.get
-            (MesAnio (mesBimPrevio mes) anioMasAntiguo)
+            (MesAnio mes anioMasAntiguo)
             reparteConsumo
     of
         Just consumoEse ->
@@ -491,7 +370,7 @@ obtnPrimerBim mes =
         Nothing ->
             case
                 Any.get
-                    (MesAnio (mesBimPrevio mes) (anioMasAntiguo + 1))
+                    (MesAnio mes (anioMasAntiguo + 1))
                     reparteConsumo
             of
                 Just consumoAhoraEste ->
@@ -505,7 +384,7 @@ obtnSegundoBim : Mes -> Int
 obtnSegundoBim mes =
     case
         Any.get
-            (MesAnio (mesBimPrevio mes) (anioMasAntiguo + 2))
+            (MesAnio mes (anioMasAntiguo + 2))
             reparteConsumo
     of
         Just consumoEse ->
@@ -514,7 +393,7 @@ obtnSegundoBim mes =
         Nothing ->
             case
                 Any.get
-                    (MesAnio (mesBimPrevio mes) (anioMasAntiguo + 1))
+                    (MesAnio mes (anioMasAntiguo + 1))
                     reparteConsumo
             of
                 Just consumoAhoraEste ->
@@ -526,10 +405,6 @@ obtnSegundoBim mes =
 
 consumo =
     let
-        obtenSubsidio : Int -> Int -> Float
-        obtenSubsidio mes1 mes2 =
-            subMes mes1 + subMes mes2 |> toFloat
-
         obtenGenera : Int -> Int -> Float
         obtenGenera m1 m2 =
             (paneles * capPanelesWatts / (4 * 595))
@@ -537,194 +412,44 @@ consumo =
                     + (Array.get (m2 - 1) genera |> Maybe.withDefault 0)
                   )
     in
-    [ { dosAtras = (obtnPrimerBim Ene + obtnPrimerBim Feb) |> toFloat
-      , unoAtras = (obtnSegundoBim Ene + obtnSegundoBim Feb) |> toFloat
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 1 2
+    List.map
+        (\indx ->
+            let
+                dosA1 =
+                    Array.get (indx * 2) mesesTy
+                        |> Maybe.map obtnPrimerBim
 
-                NonPar ->
-                    obtenSubsidio 2 3
-      , gen = obtenGenera 1 2
-      }
-    , { dosAtras = (obtnPrimerBim Mar + obtnPrimerBim Abr) |> toFloat
-      , unoAtras = (obtnSegundoBim Mar + obtnSegundoBim Abr) |> toFloat
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 3 4
+                dosA2 =
+                    Array.get (1 + indx * 2) mesesTy
+                        |> Maybe.map obtnPrimerBim
 
-                NonPar ->
-                    obtenSubsidio 4 5
-      , gen = obtenGenera 3 4
-      }
-    , { dosAtras = (obtnPrimerBim May + obtnPrimerBim Jun) |> toFloat
-      , unoAtras = (obtnSegundoBim May + obtnSegundoBim Jun) |> toFloat
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 5 6
+                unoA1 =
+                    Array.get (indx * 2) mesesTy
+                        |> Maybe.map obtnSegundoBim
 
-                NonPar ->
-                    obtenSubsidio 6 7
-      , gen = obtenGenera 5 6
-      }
-    , { dosAtras = (obtnPrimerBim Jul + obtnPrimerBim Ago) |> toFloat
-      , unoAtras = (obtnSegundoBim Jul + obtnSegundoBim Ago) |> toFloat
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 7 8
-
-                NonPar ->
-                    obtenSubsidio 8 9
-      , gen = obtenGenera 7 8
-      }
-    , { dosAtras = (obtnPrimerBim Sep + obtnPrimerBim Oct) |> toFloat
-      , unoAtras = (obtnSegundoBim Sep + obtnSegundoBim Oct) |> toFloat
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 9 10
-
-                NonPar ->
-                    obtenSubsidio 10 11
-      , gen = obtenGenera 9 10
-      }
-    , { dosAtras = (obtnPrimerBim Nov + obtnPrimerBim Dic) |> toFloat
-      , unoAtras = (obtnSegundoBim Nov + obtnSegundoBim Dic) |> toFloat
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 11 12
-
-                NonPar ->
-                    obtenSubsidio 12 1
-      , gen = obtenGenera 11 12
-      }
-    ]
-
-
-
--- ** Versión Anterior RC
-
-
-consumoEnOrden : List ( Int, Int )
-consumoEnOrden =
-    List.map2 (\bim cons -> ( bim, cons )) seQuedanBimestres consumoPaAtras
-
-
-consumoPenultimoA : Dict Int Int
-consumoPenultimoA =
-    List.take 6 consumoEnOrden |> Dict.fromList
-
-
-consumoUltimoA : Dict Int Int
-consumoUltimoA =
-    List.drop 6 consumoEnOrden |> Dict.fromList
-
-
-consumoOld =
-    let
-        obtenBimestre : Int -> Int
-        obtenBimestre talBim =
-            Array.get talBim listadoqueAplica
-                |> Maybe.withDefault 12
-
-        obtenConsumo : Int -> Dict Int Int -> Float
-        obtenConsumo delBim cualDict =
-            Dict.get (obtenBimestre delBim) cualDict
-                |> Maybe.withDefault 0
-                |> toFloat
-
-        -- TODO Actualmente en obtenGenera capturo uso meses manualmente
-        obtenGenera : Int -> Int -> Float
-        obtenGenera m1 m2 =
-            (paneles * capPanelesWatts / (4 * 595))
-                * ((Array.get (m1 - 1) genera |> Maybe.withDefault 0)
-                    + (Array.get (m2 - 1) genera |> Maybe.withDefault 0)
-                  )
-
-        subsidioMes : Int -> Int
-        subsidioMes mes =
-            if mes < 4 || mes > 9 then
-                175
-
-            else
-                450
-
-        obtenSubsidio : Int -> Int -> Float
-        obtenSubsidio mes1 mes2 =
-            subsidioMes mes1 + subsidioMes mes2 |> toFloat
-    in
-    [ { dosAtras = obtenConsumo 0 consumoPenultimoA
-      , unoAtras = obtenConsumo 0 consumoUltimoA
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 1 2
-
-                NonPar ->
-                    obtenSubsidio 2 3
-      , gen = obtenGenera 1 2
-      }
-    , { dosAtras = obtenConsumo 1 consumoPenultimoA
-      , unoAtras = obtenConsumo 1 consumoUltimoA
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 3 4
-
-                NonPar ->
-                    obtenSubsidio 4 5
-      , gen = obtenGenera 3 4
-      }
-    , { dosAtras = obtenConsumo 2 consumoPenultimoA
-      , unoAtras = obtenConsumo 2 consumoUltimoA
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 5 6
-
-                NonPar ->
-                    obtenSubsidio 6 7
-      , gen = obtenGenera 5 6
-      }
-    , { dosAtras = obtenConsumo 3 consumoPenultimoA
-      , unoAtras = obtenConsumo 3 consumoUltimoA
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 7 8
-
-                NonPar ->
-                    obtenSubsidio 8 9
-      , gen = obtenGenera 7 8
-      }
-    , { dosAtras = obtenConsumo 4 consumoPenultimoA
-      , unoAtras = obtenConsumo 4 consumoUltimoA
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 9 10
-
-                NonPar ->
-                    obtenSubsidio 10 11
-      , gen = obtenGenera 9 10
-      }
-    , { dosAtras = obtenConsumo 5 consumoPenultimoA
-      , unoAtras = obtenConsumo 5 consumoUltimoA
-      , subsidio =
-            case esteCaso of
-                ParNon ->
-                    obtenSubsidio 11 12
-
-                NonPar ->
-                    obtenSubsidio 12 1
-      , gen = obtenGenera 11 12
-      }
-    ]
+                unoA2 =
+                    Array.get (1 + indx * 2) mesesTy
+                        |> Maybe.map obtnSegundoBim
+            in
+            { dosAtras =
+                Maybe.map2 (+) dosA1 dosA2
+                    |> Maybe.map toFloat
+                    |> Maybe.withDefault 9999.0
+            , unoAtras =
+                Maybe.map2 (+) unoA1 unoA2
+                    |> Maybe.map toFloat
+                    |> Maybe.withDefault 9999.0
+            , subsidio =
+                obtenSubsidio
+                    (1 + indx * 2)
+                    (2 + indx * 2)
+            , gen =
+                obtenGenera
+                    (1 + indx * 2)
+                    (2 + indx * 2)
+            }
+        )
+        (List.range 0 5)
 
 
 
@@ -773,7 +498,7 @@ grafica =
                 [ CA.color CA.brown
                 , CA.opacity 0.4
                 ]
-                |> C.named "Consida dos años atrás"
+                |> C.named "Consumida dos años atrás"
             , C.bar .unoAtras
                 [ CA.color CA.brown
                 , CA.opacity 0.4
