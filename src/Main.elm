@@ -50,7 +50,7 @@ main =
             [ grafica |> HtmlS.fromUnstyled ]
         , HtmlS.div
             [ css [ Tw.text_2xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
-            [ HtmlS.text <| Debug.toString reparteConsumo
+            [ HtmlS.text <| Debug.toString <| subRepartido (MesAnio Mar 2023) anyDictBase
             , HtmlS.br [] []
             ]
         ]
@@ -430,6 +430,133 @@ reparteConsumo =
         secBimCons
 
 
+subMes : Int -> Int
+subMes mes =
+    if mes < 4 || mes > 9 then
+        175
+
+    else
+        450
+
+
+subRepartido : MesAnio -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
+subRepartido mesInicDelBim elDict =
+    let
+        uno =
+            (mesInicDelBim.mes |> getMesNum |> subMes |> toFloat) * (1 - parcial) |> round
+
+        dos =
+            mesInicDelBim |> mesAnioSig |> .mes |> getMesNum |> subMes
+
+        tres =
+            (mesInicDelBim |> mesAnioSig |> mesAnioSig |> .mes |> getMesNum |> subMes |> toFloat) * parcial |> round
+    in
+    elDict
+        |> Any.update
+            mesInicDelBim
+            (Maybe.map ((+) uno))
+        |> Any.update
+            (mesAnioSig mesInicDelBim)
+            (Maybe.map ((+) dos))
+        |> Any.update
+            (mesAnioSig (mesAnioSig mesInicDelBim))
+            (Maybe.map ((+) tres))
+
+
+consumo =
+    let
+        obtenSubsidio : Int -> Int -> Float
+        obtenSubsidio mes1 mes2 =
+            subMes mes1 + subMes mes2 |> toFloat
+
+        obtenBimestre : Int -> Int
+        obtenBimestre talBim =
+            Array.get talBim listadoqueAplica
+                |> Maybe.withDefault 12
+
+        obtenConsumo : Int -> Dict Int Int -> Float
+        obtenConsumo delBim cualDict =
+            Dict.get (obtenBimestre delBim) cualDict
+                |> Maybe.withDefault 0
+                |> toFloat
+
+        -- TODO Actualmente en obtenGenera capturo uso meses manualmente
+        obtenGenera : Int -> Int -> Float
+        obtenGenera m1 m2 =
+            (paneles * capPanelesWatts / (4 * 595))
+                * ((Array.get (m1 - 1) genera |> Maybe.withDefault 0)
+                    + (Array.get (m2 - 1) genera |> Maybe.withDefault 0)
+                  )
+    in
+    [ { dosAtras = obtenConsumo 0 consumoPenultimoA
+      , unoAtras = obtenConsumo 0 consumoUltimoA
+      , subsidio =
+            case esteCaso of
+                ParNon ->
+                    obtenSubsidio 1 2
+
+                NonPar ->
+                    obtenSubsidio 2 3
+      , gen = obtenGenera 1 2
+      }
+    , { dosAtras = obtenConsumo 1 consumoPenultimoA
+      , unoAtras = obtenConsumo 1 consumoUltimoA
+      , subsidio =
+            case esteCaso of
+                ParNon ->
+                    obtenSubsidio 3 4
+
+                NonPar ->
+                    obtenSubsidio 4 5
+      , gen = obtenGenera 3 4
+      }
+    , { dosAtras = obtenConsumo 2 consumoPenultimoA
+      , unoAtras = obtenConsumo 2 consumoUltimoA
+      , subsidio =
+            case esteCaso of
+                ParNon ->
+                    obtenSubsidio 5 6
+
+                NonPar ->
+                    obtenSubsidio 6 7
+      , gen = obtenGenera 5 6
+      }
+    , { dosAtras = obtenConsumo 3 consumoPenultimoA
+      , unoAtras = obtenConsumo 3 consumoUltimoA
+      , subsidio =
+            case esteCaso of
+                ParNon ->
+                    obtenSubsidio 7 8
+
+                NonPar ->
+                    obtenSubsidio 8 9
+      , gen = obtenGenera 7 8
+      }
+    , { dosAtras = obtenConsumo 4 consumoPenultimoA
+      , unoAtras = obtenConsumo 4 consumoUltimoA
+      , subsidio =
+            case esteCaso of
+                ParNon ->
+                    obtenSubsidio 9 10
+
+                NonPar ->
+                    obtenSubsidio 10 11
+      , gen = obtenGenera 9 10
+      }
+    , { dosAtras = obtenConsumo 5 consumoPenultimoA
+      , unoAtras = obtenConsumo 5 consumoUltimoA
+      , subsidio =
+            case esteCaso of
+                ParNon ->
+                    obtenSubsidio 11 12
+
+                NonPar ->
+                    obtenSubsidio 12 1
+      , gen = obtenGenera 11 12
+      }
+    ]
+
+
 
 -- ** Versión Anterior RC
 
@@ -449,7 +576,7 @@ consumoUltimoA =
     List.drop 6 consumoEnOrden |> Dict.fromList
 
 
-consumo =
+consumoOld =
     let
         obtenBimestre : Int -> Int
         obtenBimestre talBim =
