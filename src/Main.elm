@@ -56,7 +56,7 @@ main =
             , HtmlS.text <| Debug.toString <| obtnPrimerBim May
             , HtmlS.br [] []
             , HtmlS.br [] []
-            , HtmlS.text <| Debug.toString <| obtnSegBim May
+            , HtmlS.text <| Debug.toString <| obtnSegundoBim May
             , HtmlS.br [] []
             ]
         ]
@@ -501,8 +501,8 @@ obtnPrimerBim mes =
                     999999
 
 
-obtnSegBim : Mes -> Int
-obtnSegBim mes =
+obtnSegundoBim : Mes -> Int
+obtnSegundoBim mes =
     case
         Any.get
             (MesAnio (mesBimPrevio mes) (anioMasAntiguo + 2))
@@ -530,18 +530,6 @@ consumo =
         obtenSubsidio mes1 mes2 =
             subMes mes1 + subMes mes2 |> toFloat
 
-        obtenBimestre : Int -> Int
-        obtenBimestre talBim =
-            Array.get talBim listadoqueAplica
-                |> Maybe.withDefault 12
-
-        obtenConsumo : Int -> Dict Int Int -> Float
-        obtenConsumo delBim cualDict =
-            Dict.get (obtenBimestre delBim) cualDict
-                |> Maybe.withDefault 0
-                |> toFloat
-
-        -- TODO Actualmente en obtenGenera capturo uso meses manualmente
         obtenGenera : Int -> Int -> Float
         obtenGenera m1 m2 =
             (paneles * capPanelesWatts / (4 * 595))
@@ -549,8 +537,8 @@ consumo =
                     + (Array.get (m2 - 1) genera |> Maybe.withDefault 0)
                   )
     in
-    [ { dosAtras = obtenConsumo 0 consumoPenultimoA
-      , unoAtras = obtenConsumo 0 consumoUltimoA
+    [ { dosAtras = (obtnPrimerBim Ene + obtnPrimerBim Feb) |> toFloat
+      , unoAtras = (obtnSegundoBim Ene + obtnSegundoBim Feb) |> toFloat
       , subsidio =
             case esteCaso of
                 ParNon ->
@@ -560,8 +548,8 @@ consumo =
                     obtenSubsidio 2 3
       , gen = obtenGenera 1 2
       }
-    , { dosAtras = obtenConsumo 1 consumoPenultimoA
-      , unoAtras = obtenConsumo 1 consumoUltimoA
+    , { dosAtras = (obtnPrimerBim Mar + obtnPrimerBim Abr) |> toFloat
+      , unoAtras = (obtnSegundoBim Mar + obtnSegundoBim Abr) |> toFloat
       , subsidio =
             case esteCaso of
                 ParNon ->
@@ -571,8 +559,8 @@ consumo =
                     obtenSubsidio 4 5
       , gen = obtenGenera 3 4
       }
-    , { dosAtras = obtenConsumo 2 consumoPenultimoA
-      , unoAtras = obtenConsumo 2 consumoUltimoA
+    , { dosAtras = (obtnPrimerBim May + obtnPrimerBim Jun) |> toFloat
+      , unoAtras = (obtnSegundoBim May + obtnSegundoBim Jun) |> toFloat
       , subsidio =
             case esteCaso of
                 ParNon ->
@@ -582,8 +570,8 @@ consumo =
                     obtenSubsidio 6 7
       , gen = obtenGenera 5 6
       }
-    , { dosAtras = obtenConsumo 3 consumoPenultimoA
-      , unoAtras = obtenConsumo 3 consumoUltimoA
+    , { dosAtras = (obtnPrimerBim Jul + obtnPrimerBim Ago) |> toFloat
+      , unoAtras = (obtnSegundoBim Jul + obtnSegundoBim Ago) |> toFloat
       , subsidio =
             case esteCaso of
                 ParNon ->
@@ -593,8 +581,8 @@ consumo =
                     obtenSubsidio 8 9
       , gen = obtenGenera 7 8
       }
-    , { dosAtras = obtenConsumo 4 consumoPenultimoA
-      , unoAtras = obtenConsumo 4 consumoUltimoA
+    , { dosAtras = (obtnPrimerBim Sep + obtnPrimerBim Oct) |> toFloat
+      , unoAtras = (obtnSegundoBim Sep + obtnSegundoBim Oct) |> toFloat
       , subsidio =
             case esteCaso of
                 ParNon ->
@@ -604,8 +592,8 @@ consumo =
                     obtenSubsidio 10 11
       , gen = obtenGenera 9 10
       }
-    , { dosAtras = obtenConsumo 5 consumoPenultimoA
-      , unoAtras = obtenConsumo 5 consumoUltimoA
+    , { dosAtras = (obtnPrimerBim Nov + obtnPrimerBim Dic) |> toFloat
+      , unoAtras = (obtnSegundoBim Nov + obtnSegundoBim Dic) |> toFloat
       , subsidio =
             case esteCaso of
                 ParNon ->
