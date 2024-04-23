@@ -27,7 +27,6 @@ import Tailwind.Utilities as Tw
 
 
 -- * Main que en este caso es solo el view
--- Este es el gráfico para el consumo del cliente de David de Yessica 24-ene-2024
 
 
 main : Html msg
@@ -50,7 +49,7 @@ main =
             [ grafica |> HtmlS.fromUnstyled ]
         , HtmlS.div
             [ css [ Tw.text_2xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
-            [ HtmlS.text <| Debug.toString unoDict
+            [ HtmlS.text <| Debug.toString secBimestres
             , HtmlS.br [] []
             ]
         ]
@@ -243,14 +242,18 @@ listaMesesTx =
     [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
 
 
-convierteLlave : MesAnio -> ( String, Int )
+type alias LlaveComparable =
+    ( String, Int )
+
+
+convierteLlave : MesAnio -> LlaveComparable
 convierteLlave monthYear =
     ( getMesTxt monthYear.mes
     , monthYear.anio
     )
 
 
-anyDictBase : AnyDict ( String, Int ) MesAnio Int
+anyDictBase : AnyDict LlaveComparable MesAnio Int
 anyDictBase =
     let
         secMesesIdx : List Int
@@ -370,7 +373,7 @@ seQuedanBimestres =
 -- ** Versioń Nueva RC
 
 
-reparteAMeses : Int -> MesAnio -> AnyDict comparable MesAnio Int -> AnyDict comparable MesAnio Int
+reparteAMeses : Int -> MesAnio -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
 reparteAMeses consumoDelBim mesInicDelBim elDict =
     let
         uno =
