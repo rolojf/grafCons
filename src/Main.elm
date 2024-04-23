@@ -50,7 +50,13 @@ main =
             [ grafica |> HtmlS.fromUnstyled ]
         , HtmlS.div
             [ css [ Tw.text_2xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
-            [ HtmlS.text <| Debug.toString <| subRepartido (MesAnio Mar 2023)
+            [ HtmlS.text <| Debug.toString <| reparteConsumo
+            , HtmlS.br [] []
+            , HtmlS.br [] []
+            , HtmlS.text <| Debug.toString <| obtnPrimerBim May
+            , HtmlS.br [] []
+            , HtmlS.br [] []
+            , HtmlS.text <| Debug.toString <| obtnSegBim May
             , HtmlS.br [] []
             ]
         ]
@@ -238,21 +244,13 @@ mesAnioSig anterior =
     }
 
 
-mesAnioAnt : MesAnio -> MesAnio
-mesAnioAnt anterior =
-    { mes =
-        if anterior.mes == Ene then
-            Dic
+mesAnt : Mes -> Mes
+mesAnt anterior =
+    if anterior == Ene then
+        Dic
 
-        else
-            Array.get (getMesNum anterior.mes) mesesTy |> Maybe.withDefault Nov
-    , anio =
-        if anterior.mes == Ene then
-            anterior.anio - 1
-
-        else
-            anterior.anio
-    }
+    else
+        Array.get (getMesNum anterior - 1) mesesTy |> Maybe.withDefault Nov
 
 
 listaMesesTx : List String
@@ -471,10 +469,63 @@ subRepartido mesInicDelBim =
     uno + dos + tres
 
 
+mesBimPrevio : Mes -> Mes
+mesBimPrevio =
+    if parcial <= 0.5 then
+        mesAnt >> mesAnt
+
+    else
+        mesAnt >> mesAnt >> mesAnt
+
+
+obtnPrimerBim : Mes -> Int
+obtnPrimerBim mes =
+    case
+        Any.get
+            (MesAnio (mesBimPrevio mes) anioMasAntiguo)
+            reparteConsumo
+    of
+        Just consumoEse ->
+            consumoEse
+
+        Nothing ->
+            case
+                Any.get
+                    (MesAnio (mesBimPrevio mes) (anioMasAntiguo + 1))
+                    reparteConsumo
+            of
+                Just consumoAhoraEste ->
+                    consumoAhoraEste
+
+                Nothing ->
+                    999999
+
+
+obtnSegBim : Mes -> Int
+obtnSegBim mes =
+    case
+        Any.get
+            (MesAnio (mesBimPrevio mes) (anioMasAntiguo + 2))
+            reparteConsumo
+    of
+        Just consumoEse ->
+            consumoEse
+
+        Nothing ->
+            case
+                Any.get
+                    (MesAnio (mesBimPrevio mes) (anioMasAntiguo + 1))
+                    reparteConsumo
+            of
+                Just consumoAhoraEste ->
+                    consumoAhoraEste
+
+                Nothing ->
+                    999999
+
+
 consumo =
     let
-        -- obtnPrimer :  Mes -> MesAnio
-        -- obtnPrimer mes =
         obtenSubsidio : Int -> Int -> Float
         obtenSubsidio mes1 mes2 =
             subMes mes1 + subMes mes2 |> toFloat
