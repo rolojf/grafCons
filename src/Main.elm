@@ -238,6 +238,23 @@ mesAnioSig anterior =
     }
 
 
+mesAnioAnt : MesAnio -> MesAnio
+mesAnioAnt anterior =
+    { mes =
+        if anterior.mes == Ene then
+            Dic
+
+        else
+            Array.get (getMesNum anterior.mes) mesesTy |> Maybe.withDefault Nov
+    , anio =
+        if anterior.mes == Ene then
+            anterior.anio - 1
+
+        else
+            anterior.anio
+    }
+
+
 listaMesesTx : List String
 listaMesesTx =
     [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
@@ -456,6 +473,8 @@ subRepartido mesInicDelBim =
 
 consumo =
     let
+        -- obtnPrimer :  Mes -> MesAnio
+        -- obtnPrimer mes =
         obtenSubsidio : Int -> Int -> Float
         obtenSubsidio mes1 mes2 =
             subMes mes1 + subMes mes2 |> toFloat
