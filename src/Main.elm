@@ -3,6 +3,7 @@ module Main exposing (..)
 -- * Imports
 
 import Array exposing (Array)
+import Array.Extra as Array
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
@@ -49,7 +50,7 @@ main =
             [ grafica |> HtmlS.fromUnstyled ]
         , HtmlS.div
             [ css [ Tw.text_2xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
-            [ HtmlS.text <| Debug.toString secBimestres
+            [ HtmlS.text <| Debug.toString reparteConsumo
             , HtmlS.br [] []
             ]
         ]
@@ -309,6 +310,18 @@ secBimestres =
         |> Array.fromList
 
 
+secBimCons : Array ( MesAnio, Int )
+secBimCons =
+    let
+        consumoArray =
+            Array.fromList consumoPaAtras
+    in
+    Array.map2
+        (\bim cons -> ( bim, cons ))
+        secBimestres
+        consumoArray
+
+
 
 -- ** Version Anterior CL
 
@@ -383,7 +396,7 @@ reparteAMeses consumoDelBim mesInicDelBim elDict =
             round <| 31.0 * toFloat consumoDelBim / 61
 
         tres =
-            round <| parcial * 30.0 * toFloat consumoDelBim / 61
+            consumoDelBim - uno - dos
     in
     elDict
         |> Any.update
@@ -402,6 +415,19 @@ unoDict =
         |> reparteAMeses
             2000
             (MesAnio Dic 2023)
+
+
+reparteConsumo : AnyDict LlaveComparable MesAnio Int
+reparteConsumo =
+    Array.foldl
+        (\cadaElem elDic ->
+            elDic
+                |> reparteAMeses
+                    (Tuple.second cadaElem)
+                    (Tuple.first cadaElem)
+        )
+        anyDictBase
+        secBimCons
 
 
 
