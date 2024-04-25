@@ -69,6 +69,57 @@ genera =
     [ 245, 259, 331, 337, 366, 367, 379, 374, 311, 287, 247, 233 ] |> Array.fromList
 
 
+limDAC =
+    850
+
+
+repartoXestacionalidad =
+    Any.fromList getMesNum [ ( Ene, 0.22 ), ( Feb, 0.2 ), ( Mar, 0.1 ), ( Abr, 0.25 ), ( May, 0.8 ), ( Jun, 1.0 ), ( Jul, 1.0 ), ( Ago, 0.85 ), ( Sep, 0.7 ), ( Oct, 0.3 ), ( Nov, 0.1 ), ( Dic, 0.2 ) ]
+
+
+
+-- * Valores Particulares
+
+
+bimestresDeHistorial : Int
+bimestresDeHistorial =
+    12
+
+
+paneles : Float
+paneles =
+    7
+
+
+capPanelesWatts =
+    595
+
+
+consumoPaAtras : List Int
+consumoPaAtras =
+    [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ]
+        |> List.reverse
+
+
+parcial : Float
+parcial =
+    18 / 31
+
+
+mesMasAntiguo : Mes
+mesMasAntiguo =
+    Ago
+
+
+anioMasAntiguo : Int
+anioMasAntiguo =
+    2022
+
+
+
+-- * Funciones Habilitadoras
+
+
 type Mes
     = Ene
     | Feb
@@ -84,8 +135,8 @@ type Mes
     | Dic
 
 
-repartoXestacionalidad =
-    Any.fromList getMesNum [ ( Ene, 0.22 ), ( Feb, 0.2 ), ( Mar, 0.1 ), ( Abr, 0.25 ), ( May, 0.8 ), ( Jun, 1.0 ), ( Jul, 1.0 ), ( Ago, 0.85 ), ( Sep, 0.7 ), ( Oct, 0.3 ), ( Nov, 0.1 ), ( Dic, 0.2 ) ]
+type alias LlaveComparable =
+    ( String, Int )
 
 
 mesesTx : Array String
@@ -97,6 +148,11 @@ mesesTy : Array Mes
 mesesTy =
     Array.fromList
         [ Ene, Feb, Mar, Abr, May, Jun, Jul, Ago, Sep, Oct, Nov, Dic ]
+
+
+listaMesesTx : List String
+listaMesesTx =
+    [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
 
 
 mesesToGraph : Array Mes
@@ -129,63 +185,10 @@ getMesTxt cualMes =
         |> Maybe.withDefault "Error"
 
 
-listadoDeMeses : List String
-listadoDeMeses =
-    List.repeat 3 listaMesesTx
-        |> List.concat
-
-
 type alias MesAnio =
     { mes : Mes
     , anio : Int
     }
-
-
-
--- * Valores Particulares
-
-
-bimestresDeHistorial : Int
-bimestresDeHistorial =
-    12
-
-
-paneles : Float
-paneles =
-    7
-
-
-limDAC =
-    850
-
-
-capPanelesWatts =
-    595
-
-
-consumoPaAtras : List Int
-consumoPaAtras =
-    [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ]
-        |> List.reverse
-
-
-parcial : Float
-parcial =
-    18 / 31
-
-
-mesMasAntiguo : Mes
-mesMasAntiguo =
-    Ago
-
-
-anioMasAntiguo : Int
-anioMasAntiguo =
-    2022
-
-
-
--- * Construcción de listados
 
 
 mesAnioSig : MesAnio -> MesAnio
@@ -219,20 +222,21 @@ mesAnt anterior =
         Array.get (getMesNum anterior - 1) mesesTy |> Maybe.withDefault Nov
 
 
-listaMesesTx : List String
-listaMesesTx =
-    [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
-
-
-type alias LlaveComparable =
-    ( String, Int )
-
-
 convierteLlave : MesAnio -> LlaveComparable
 convierteLlave monthYear =
     ( getMesTxt monthYear.mes
     , monthYear.anio
     )
+
+
+
+-- * Construcción de listados
+
+
+listadoDeMeses : List String
+listadoDeMeses =
+    List.repeat 3 listaMesesTx
+        |> List.concat
 
 
 anyDictBase : AnyDict LlaveComparable MesAnio Int
@@ -331,13 +335,6 @@ reparteAMeses consumoDelBim mesInicDelBim elDict =
             (Maybe.map ((+) tres))
 
 
-unoDict =
-    anyDictBase
-        |> reparteAMeses
-            2000
-            (MesAnio Dic 2023)
-
-
 reparteConsumo : AnyDict LlaveComparable MesAnio Int
 reparteConsumo =
     Array.foldl
@@ -372,8 +369,8 @@ obtnSubsidio mes1 mes2 =
         |> toFloat
 
 
-obtnPrimerBim : Mes -> Int
-obtnPrimerBim mes =
+obtnConsumoDelMesPenultimoAnio : Mes -> Int
+obtnConsumoDelMesPenultimoAnio mes =
     case
         Any.get
             (MesAnio mes anioMasAntiguo)
@@ -395,8 +392,8 @@ obtnPrimerBim mes =
                     999999
 
 
-obtnSegundoBim : Mes -> Int
-obtnSegundoBim mes =
+obtnConsumoDelMesUltimoAnio : Mes -> Int
+obtnConsumoDelMesUltimoAnio mes =
     case
         Any.get
             (MesAnio mes (anioMasAntiguo + 2))
@@ -418,24 +415,24 @@ obtnSegundoBim mes =
                     999999
 
 
+obtenGenera : Int -> Int -> Float
+obtenGenera m1 m2 =
+    (paneles * capPanelesWatts / (4 * 595))
+        * ((Array.get (m1 - 1) genera |> Maybe.withDefault 0)
+            + (Array.get (m2 - 1) genera |> Maybe.withDefault 0)
+          )
+
+
 consumo =
-    let
-        obtenGenera : Int -> Int -> Float
-        obtenGenera m1 m2 =
-            (paneles * capPanelesWatts / (4 * 595))
-                * ((Array.get (m1 - 1) genera |> Maybe.withDefault 0)
-                    + (Array.get (m2 - 1) genera |> Maybe.withDefault 0)
-                  )
-    in
     Array.map
         (\month ->
             { dosAtras =
-                obtnPrimerBim month
-                    + obtnPrimerBim (mesSig month)
+                obtnConsumoDelMesPenultimoAnio month
+                    + obtnConsumoDelMesPenultimoAnio (mesSig month)
                     |> toFloat
             , unoAtras =
-                obtnSegundoBim month
-                    + obtnSegundoBim (mesSig month)
+                obtnConsumoDelMesUltimoAnio month
+                    + obtnConsumoDelMesUltimoAnio (mesSig month)
                     |> toFloat
             , subsidio =
                 obtnSubsidio
