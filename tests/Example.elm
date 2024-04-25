@@ -2,10 +2,11 @@ module Example exposing (todos)
 
 -- import Fuzz exposing (Fuzzer, int, list, string)
 
+import Dict.Any as Any
 import Expect exposing (Expectation)
 import Main
 import Test exposing (..)
-import Dict.Any as Any
+
 
 todos =
     Test.concat
@@ -20,6 +21,9 @@ suite1 =
         [ test "Enero" (\_ -> Expect.equal (Main.getMesNum Main.Ene) 1)
         , test "Septiembre" (\_ -> Expect.equal (Main.getMesNum Main.Sep) 9)
         , test "Diciembre" (\_ -> Expect.equal (Main.getMesNum Main.Dic) 12)
+        , test "mesSiguienteDic" (\_ -> Expect.equal (Main.mesSig Main.Dic) Main.Ene)
+        , test "mesSiguientJule" (\_ -> Expect.equal (Main.mesSig Main.Jul) Main.Ago)
+        , test "mesSiguienteEne" (\_ -> Expect.equal (Main.mesSig Main.Ene) Main.Feb)
         ]
 
 
@@ -42,9 +46,13 @@ suite2 =
         [ test "MesAnio Marzo" (\_ -> Expect.equal (Main.mesAnioSig marzo) abril)
         , test "MesAnio Diciembre" (\_ -> Expect.equal (Main.mesAnioSig diciembre) enero)
         , test "Conviete a comparable" (\_ -> Expect.equal (Main.convierteLlave abril) ( "Abr", 2022 ))
-        , test "Suma de watts anuales" (\_ -> Expect.lessThan 2
-                     ((List.sum Main.consumoPaAtras)
-                      - (Any.values Main.reparteConsumo |> List.sum)))
+        , test "Suma de watts anuales"
+            (\_ ->
+                Expect.lessThan 2
+                    (List.sum Main.consumoPaAtras
+                        - (Any.values Main.reparteConsumo |> List.sum)
+                    )
+            )
 
         --, test "reparticion normal" (\_ -> Expect.equal (Main.convierteLlave abril) ( "Abr", 2022 ))
         ]

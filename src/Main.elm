@@ -84,6 +84,10 @@ type Mes
     | Dic
 
 
+repartoXestacionalidad =
+    Any.fromList getMesNum [ ( Ene, 0.22 ), ( Feb, 0.2 ), ( Mar, 0.1 ), ( Abr, 0.25 ), ( May, 0.8 ), ( Jun, 1.0 ), ( Jul, 1.0 ), ( Ago, 0.85 ), ( Sep, 0.7 ), ( Oct, 0.3 ), ( Nov, 0.1 ), ( Dic, 0.2 ) ]
+
+
 mesesTx : Array String
 mesesTx =
     Array.fromList listaMesesTx
@@ -93,6 +97,12 @@ mesesTy : Array Mes
 mesesTy =
     Array.fromList
         [ Ene, Feb, Mar, Abr, May, Jun, Jul, Ago, Sep, Oct, Nov, Dic ]
+
+
+mesesToGraph : Array Mes
+mesesToGraph =
+    Array.fromList
+        [ Ene, Mar, May, Jul, Sep, Nov ]
 
 
 getMesNum : Mes -> Int
@@ -193,6 +203,11 @@ mesAnioSig anterior =
         else
             anterior.anio
     }
+
+
+mesSig : Mes -> Mes
+mesSig month =
+    Array.get (getMesNum month) mesesTy |> Maybe.withDefault Ene
 
 
 mesAnt : Mes -> Mes
@@ -350,8 +365,8 @@ subMes mmes =
             99999
 
 
-obtenSubsidio : Int -> Int -> Float
-obtenSubsidio mes1 mes2 =
+obtnSubsidio : Int -> Int -> Float
+obtnSubsidio mes1 mes2 =
     subMes (Array.get (mes1 - 1) mesesTy)
         + subMes (Array.get (mes2 - 1) mesesTy)
         |> toFloat
@@ -412,44 +427,28 @@ consumo =
                     + (Array.get (m2 - 1) genera |> Maybe.withDefault 0)
                   )
     in
-    List.map
-        (\indx ->
-            let
-                dosA1 =
-                    Array.get (indx * 2) mesesTy
-                        |> Maybe.map obtnPrimerBim
-
-                dosA2 =
-                    Array.get (1 + indx * 2) mesesTy
-                        |> Maybe.map obtnPrimerBim
-
-                unoA1 =
-                    Array.get (indx * 2) mesesTy
-                        |> Maybe.map obtnSegundoBim
-
-                unoA2 =
-                    Array.get (1 + indx * 2) mesesTy
-                        |> Maybe.map obtnSegundoBim
-            in
+    Array.map
+        (\month ->
             { dosAtras =
-                Maybe.map2 (+) dosA1 dosA2
-                    |> Maybe.map toFloat
-                    |> Maybe.withDefault 9999.0
+                obtnPrimerBim month
+                    + obtnPrimerBim (mesSig month)
+                    |> toFloat
             , unoAtras =
-                Maybe.map2 (+) unoA1 unoA2
-                    |> Maybe.map toFloat
-                    |> Maybe.withDefault 9999.0
+                obtnSegundoBim month
+                    + obtnSegundoBim (mesSig month)
+                    |> toFloat
             , subsidio =
-                obtenSubsidio
-                    (1 + indx * 2)
-                    (2 + indx * 2)
+                obtnSubsidio
+                    (getMesNum month)
+                    (1 + getMesNum month)
             , gen =
                 obtenGenera
-                    (1 + indx * 2)
-                    (2 + indx * 2)
+                    (getMesNum month)
+                    (1 + getMesNum month)
             }
         )
-        (List.range 0 5)
+        mesesToGraph
+        |> Array.toList
 
 
 
