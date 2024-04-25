@@ -348,25 +348,13 @@ reparteConsumo =
         secBimCons
 
 
-subMes : Maybe Mes -> Int
-subMes mmes =
-    case mmes of
-        Just month ->
-            if List.member month [ Ene, Feb, Mar, Oct, Nov, Dic ] then
-                175
+obtnSub : Mes -> Float
+obtnSub mmes =
+    if List.member mmes [ Ene, Feb, Mar, Oct, Nov, Dic ] then
+        175.0
 
-            else
-                450
-
-        Nothing ->
-            99999
-
-
-obtnSubsidio : Int -> Int -> Float
-obtnSubsidio mes1 mes2 =
-    subMes (Array.get (mes1 - 1) mesesTy)
-        + subMes (Array.get (mes2 - 1) mesesTy)
-        |> toFloat
+    else
+        450.0
 
 
 obtnConsumoDelMesPenultimoAnio : Mes -> Int
@@ -435,9 +423,7 @@ consumo =
                     + obtnConsumoDelMesUltimoAnio (mesSig month)
                     |> toFloat
             , subsidio =
-                obtnSubsidio
-                    (getMesNum month)
-                    (1 + getMesNum month)
+                obtnSub month + obtnSub (mesSig month)
             , gen =
                 obtenGenera
                     (getMesNum month)
