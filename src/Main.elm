@@ -6,7 +6,6 @@ import Array exposing (Array)
 import Array.Extra as Array
 import Chart as C
 import Chart.Attributes as CA
-import Chart.Events as CE
 import Chart.Item as CI
 import Css.Global
 import Dict exposing (Dict)
@@ -114,6 +113,11 @@ mesMasAntiguo =
 anioMasAntiguo : Int
 anioMasAntiguo =
     2022
+
+
+adic : Array Float
+adic =
+    [ 100.0, 150.0, 250.0, 500.0, 650.0, 750.0, 750.0, 650.0, 500.0, 250.0, 150.0, 100.0 ] |> Array.fromList
 
 
 
@@ -428,6 +432,13 @@ consumo =
                 obtenGenera
                     (getMesNum month)
                     (1 + getMesNum month)
+            , adicional =
+                case Maybe.map2 (+) (Array.get (getMesNum month) adic) (Array.get (getMesNum month - 1) adic) of
+                    Just laSuma ->
+                        laSuma
+
+                    Nothing ->
+                        100000.0
             }
         )
         mesesToGraph
@@ -441,16 +452,15 @@ consumo =
 grafica : Html msg
 grafica =
     C.chart
-        [ CA.width 480
-        , CA.height 360
+        [ CA.width 700
+        , CA.height 480
         ]
-        [ C.yAxis [ CA.width 0.15, CA.noArrow, CA.color CA.darkBlue ]
-        , C.xAxis [ CA.width 0.15, CA.noArrow, CA.color CA.darkBlue ]
-        , -- para generar los meses que salen abajo en eje x
-          C.generate 12 C.ints .x [] <|
+        [ C.yAxis [ CA.width 1.0, CA.noArrow, CA.color CA.darkBlue ]
+        , C.xAxis [ CA.width 2.0, CA.noArrow, CA.color CA.purple ]
+        , C.generate 12 C.ints .x [] <|
             \plane valor ->
                 [ C.xLabel
-                    [ CA.x (toFloat valor), CA.fontSize 12, CA.color "blue" ]
+                    [ CA.x (toFloat valor), CA.fontSize 16, CA.color "blue" ]
                     [ S.text <|
                         Maybe.withDefault "Ene"
                             (Array.get
@@ -460,9 +470,8 @@ grafica =
                     ]
                 ]
         , C.yLabels
-            -- medidas del eje y
             [ CA.withGrid
-            , CA.fontSize 12
+            , CA.fontSize 16
             , CA.color "blue"
             ]
         , C.labelAt
@@ -471,28 +480,42 @@ grafica =
             CA.middle
             [ CA.moveLeft 5
             , CA.rotate 90
-            , CA.fontSize 18
+            , CA.fontSize 20
             , CA.color "blue"
             ]
             [ S.text "Energía - kWh" ]
         , C.bars [ CA.margin 0.13 ]
-            [ C.bar .dosAtras
-                [ CA.color CA.brown
-                , CA.opacity 0.4
+            [ C.stacked
+                [ C.bar .adicional
+                    [ CA.color CA.blue
+                    , CA.opacity 0.7
+                    ]
+                    |> C.named "Consumo adicional"
+                , C.bar .dosAtras
+                    [ CA.color CA.brown
+                    , CA.opacity 0.7
+                    ]
+                    |> C.named "Consumo año antepasado"
                 ]
-                |> C.named "Consumida dos años atrás"
-            , C.bar .unoAtras
-                [ CA.color CA.brown
-                , CA.opacity 0.4
-                ]
-                |> C.named "Consumida año pasado"
             , C.stacked
-                [ C.bar .subsidio [ CA.color CA.yellow, CA.opacity 0.9 ] |> C.named "Subsidiada- Barata"
+                [ C.bar .adicional
+                    [ CA.color CA.blue
+                    , CA.opacity 0.7
+                    ]
+                    |> C.named "Consumo adicional"
+                , C.bar .unoAtras
+                    [ CA.color CA.brown
+                    , CA.opacity 0.7
+                    ]
+                    |> C.named "Consumo año pasado"
+                ]
+            , C.stacked
+                [ C.bar .subsidio [ CA.color CA.yellow, CA.opacity 0.9 ] |> C.named "Subsidiada Barata"
                 , C.bar
                     (\elReg ->
                         let
                             elMax =
-                                max 0 (max elReg.dosAtras elReg.unoAtras)
+                                max 0 (max elReg.dosAtras elReg.unoAtras + elReg.adicional)
                         in
                         if elMax == 0 then
                             0
