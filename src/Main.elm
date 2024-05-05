@@ -41,7 +41,43 @@ main =
         , div
             [ css
                 [ Tw.max_w_screen_sm
-                , Tw.my_12
+                , Tw.mt_2
+                , Tw.mx_20
+                , Tw.h_full
+                , Tw.text_3xl
+                , Tw.font_semibold
+                , Tw.text_color Theme.gray_500
+                ]
+            ]
+            [ text
+                ("Su Consumo vs Generación de Panel de "
+                    ++ format usLocale (capPanelesWatts * paneles / 1000)
+                    ++ " kWp"
+                )
+            ]
+        , div
+            [ css
+                [ Tw.max_w_screen_sm
+                , Tw.mt_1
+                , Tw.mx_32
+                , Tw.h_full
+                , Tw.text_xl
+                , Tw.text_color Theme.gray_500
+                ]
+            ]
+            [ text
+                (format usLocale (capPanelesWatts * paneles / 1000)
+                    ++ " kWp porque son "
+                    ++ String.fromFloat paneles
+                    ++ " paneles por "
+                    ++ String.fromInt capPanelesWatts
+                    ++ " watts cada uno / 1,000 "
+                )
+            ]
+        , div
+            [ css
+                [ Tw.max_w_screen_sm
+                , Tw.mt_6
                 , Tw.mx_36
                 , Tw.h_full
                 ]
@@ -55,13 +91,22 @@ main =
            , HtmlS.br [] []
            ]
         -}
-        , div [ css [ Tw.max_w_screen_sm, Tw.mx_36, Tw.text_xl, Tw.font_semibold, Tw.text_color Theme.gray_500 ] ]
+        , div [ css [ Tw.max_w_screen_sm, Tw.mt_10, Tw.mx_36, Tw.text_xl, Tw.font_semibold, Tw.text_color Theme.gray_500 ] ]
             [ text "En cada bimestre, las dos primeras "
             , span [ css [ Tw.text_color Theme.amber_800 ] ]
                 [ text "barras café " ]
-            , text " son el consumo de años previos. Y se suma "
-            , span [ css [ Tw.text_color Theme.sky_500 ] ]
-                [ text "el consumo adicional esperado por climas." ]
+            , text " son el consumo de años previos. "
+            , if hayAdic then
+                text "Y se suma "
+
+              else
+                text ""
+            , if hayAdic then
+                span [ css [ Tw.text_color Theme.sky_500 ] ]
+                    [ text "el consumo adicional esperado por climas." ]
+
+              else
+                text ""
             , text " La ideas es pues ver que "
             , span
                 [ css [ Tw.text_color Theme.green_600 ] ]
@@ -86,6 +131,10 @@ genera =
     [ 245, 259, 331, 337, 366, 367, 379, 374, 311, 287, 247, 233 ] |> Array.fromList
 
 
+reparteAdic =
+    [ 0.3, 0.3, 0.1, 0.5, 0.8, 1.0, 1.0, 0.9, 0.7, 0.3, 0.2, 0.2 ]
+
+
 limDAC =
     850
 
@@ -94,8 +143,49 @@ repartoXestacionalidad =
     Any.fromList getMesNum [ ( Ene, 0.22 ), ( Feb, 0.2 ), ( Mar, 0.1 ), ( Abr, 0.25 ), ( May, 0.8 ), ( Jun, 1.0 ), ( Jul, 1.0 ), ( Ago, 0.85 ), ( Sep, 0.7 ), ( Oct, 0.3 ), ( Nov, 0.1 ), ( Dic, 0.2 ) ]
 
 
+type Frecuente
+    = Diario Float
+    | Semanal Float Int
+    | Mensual Float Int
+
+
+type TipoClima
+    = Normal
+    | Inverter
+
+
+type alias Clima =
+    { tons : Float
+    , horasEnArranque : Float
+    , tipoClima : TipoClima
+    , area : String
+    , frecUso : Frecuente
+    }
+
+
 
 -- * Valores Particulares
+
+
+climasAdic : List Clima
+climasAdic =
+    [ { tons = 1.0, horasEnArranque = 2, tipoClima = Inverter, area = "Recamara de los niños", frecUso = Diario 9.0 }
+    , { tons = 1.5, horasEnArranque = 2, tipoClima = Normal, area = "Área Social", frecUso = Semanal 7.0 2 }
+    ]
+
+
+hayAdic : Bool
+hayAdic =
+    True
+
+
+adic : Array Float
+adic =
+    let
+        consMax =
+            List.map kWhxTonHr climasAdic |> List.sum
+    in
+    List.map (\cadaMes -> consMax * cadaMes) reparteAdic |> Array.fromList
 
 
 bimestresDeHistorial : Int
@@ -133,13 +223,65 @@ anioMasAntiguo =
     2022
 
 
-adic : Array Float
-adic =
-    [ 100.0, 150.0, 250.0, 500.0, 650.0, 750.0, 750.0, 650.0, 500.0, 250.0, 150.0, 100.0 ] |> Array.fromList
-
-
 
 -- * Funciones Habilitadoras
+
+
+kWhxTonHr : Clima -> Float
+kWhxTonHr clima =
+    let
+        consumoOperacion =
+            if clima.tipoClima == Inverter then
+                0.5
+
+            else
+                0.8
+
+        consumoArranque =
+            if clima.tipoClima == Inverter then
+                0.9
+
+            else
+                1.3
+    in
+    case clima.frecUso of
+        Diario horas ->
+            (horas - clima.horasEnArranque)
+                * clima.tons
+                * consumoOperacion
+                + clima.horasEnArranque
+                * clima.tons
+                * consumoArranque
+                * 30
+
+        Semanal horas veces ->
+            (if (clima.horasEnArranque * toFloat veces - horas) < 0 then
+                0
+
+             else
+                (horas - (toFloat veces * clima.horasEnArranque))
+                    * clima.tons
+                    * consumoOperacion
+            )
+                + clima.horasEnArranque
+                * toFloat veces
+                * clima.tons
+                * consumoArranque
+                * 4.33
+
+        Mensual horas veces ->
+            (if (clima.horasEnArranque * toFloat veces - horas) < 0 then
+                0
+
+             else
+                (horas - (toFloat veces * clima.horasEnArranque))
+                    * clima.tons
+                    * consumoOperacion
+            )
+                + clima.horasEnArranque
+                * toFloat veces
+                * clima.tons
+                * consumoArranque
 
 
 type Mes
@@ -451,12 +593,16 @@ consumo =
                     (getMesNum month)
                     (1 + getMesNum month)
             , adicional =
-                case Maybe.map2 (+) (Array.get (getMesNum month) adic) (Array.get (getMesNum month - 1) adic) of
-                    Just laSuma ->
-                        laSuma
+                if hayAdic then
+                    case Maybe.map2 (+) (Array.get (getMesNum month) adic) (Array.get (getMesNum month - 1) adic) of
+                        Just laSuma ->
+                            laSuma
 
-                    Nothing ->
-                        100000.0
+                        Nothing ->
+                            100000.0
+
+                else
+                    0
             }
         )
         mesesToGraph
@@ -471,7 +617,7 @@ grafica : Html msg
 grafica =
     C.chart
         [ CA.width 700
-        , CA.height 480
+        , CA.height 420
         ]
         [ C.yAxis [ CA.width 1.0, CA.noArrow, CA.color CA.darkBlue ]
         , C.xAxis [ CA.width 2.0, CA.noArrow, CA.color CA.purple ]
@@ -552,14 +698,4 @@ grafica =
                     )
             ]
             consumo
-
-        {- , C.legendsAt .max
-           .max
-           [ CA.column
-           , CA.moveLeft 5
-           , CA.alignRight
-           , CA.spacing 4
-           ]
-           []
-        -}
         ]
