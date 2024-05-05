@@ -14,7 +14,7 @@ import FormatNumber exposing (format)
 import FormatNumber.Locales exposing (usLocale)
 import Html exposing (Html)
 import Html.Attributes as Attr
-import Html.Styled as HtmlS
+import Html.Styled as HtmlS exposing (div, span, text)
 import Html.Styled.Attributes exposing (css)
 import List.Extra as List
 import Svg as S
@@ -31,14 +31,14 @@ import Tailwind.Utilities as Tw
 
 main : Html msg
 main =
-    HtmlS.div
+    div
         [ css
             [ Tw.container
             , Tw.mx_auto
             ]
         ]
         [ Css.Global.global Tw.globalStyles
-        , HtmlS.div
+        , div
             [ css
                 [ Tw.max_w_screen_sm
                 , Tw.my_12
@@ -48,13 +48,31 @@ main =
             ]
             [ grafica |> HtmlS.fromUnstyled ]
 
-        {- , HtmlS.div
+        {- , div
            [ css [ Tw.text_2xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
-           [ HtmlS.text <| Debug.toString <| obtenSubsidio 0 6
+           [ text <| Debug.toString <| obtenSubsidio 0 6
            , HtmlS.br [] []
            , HtmlS.br [] []
            ]
         -}
+        , div [ css [ Tw.max_w_screen_sm, Tw.mx_36, Tw.text_xl, Tw.font_semibold, Tw.text_color Theme.gray_500 ] ]
+            [ text "En cada bimestre, las dos primeras "
+            , span [ css [ Tw.text_color Theme.amber_800 ] ]
+                [ text "barras café " ]
+            , text " son el consumo de años previos. Y se suma "
+            , span [ css [ Tw.text_color Theme.sky_500 ] ]
+                [ text "el consumo adicional esperado por climas." ]
+            , text " La ideas es pues ver que "
+            , span
+                [ css [ Tw.text_color Theme.green_600 ] ]
+                [ text "lo generado por el PANEL SOLAR, " ]
+            , text "alcance para mínimo "
+            , span [ css [ Tw.text_color Theme.red_600 ] ]
+                [ text "el consumo con tarifa excedente (alto costo) " ]
+            , text " y a lo mejor también para algo del "
+            , span [ css [ Tw.text_color Theme.yellow_600 ] ]
+                [ text " consumo con subsidio (bajo costo). " ]
+            ]
         ]
         |> HtmlS.toUnstyled
 
@@ -534,12 +552,14 @@ grafica =
                     )
             ]
             consumo
-        , C.legendsAt .max
-            .max
-            [ CA.column
-            , CA.moveLeft 15
-            , CA.alignRight
-            , CA.spacing 5
-            ]
-            []
+
+        {- , C.legendsAt .max
+           .max
+           [ CA.column
+           , CA.moveLeft 5
+           , CA.alignRight
+           , CA.spacing 4
+           ]
+           []
+        -}
         ]
