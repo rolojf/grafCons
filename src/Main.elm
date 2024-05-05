@@ -85,17 +85,17 @@ main =
             [ grafica |> HtmlS.fromUnstyled ]
 
         {- , div
-           [ css [ Tw.text_2xl, Tw.text_color Theme.lime_800, Tw.mb_4 ] ]
-           [ text <| Debug.toString <| obtenSubsidio 0 6
-           , HtmlS.br [] []
-           , HtmlS.br [] []
+           [ css [ Tw.text_2xl, Tw.text_color Theme.lime_800, Tw.m_6 ] ]
+           [ text <|
+               Debug.toString <|
+                   Array.map (format usLocale) adic
            ]
         -}
         , div [ css [ Tw.max_w_screen_sm, Tw.mt_10, Tw.mx_36, Tw.text_xl, Tw.font_semibold, Tw.text_color Theme.gray_500 ] ]
             [ text "En cada bimestre, las dos primeras "
             , span [ css [ Tw.text_color Theme.amber_800 ] ]
                 [ text "barras café " ]
-            , text " son el consumo de años previos. "
+            , text " son el consumo en años previos. "
             , if hayAdic then
                 text "Y se suma "
 
@@ -103,20 +103,20 @@ main =
                 text ""
             , if hayAdic then
                 span [ css [ Tw.text_color Theme.sky_500 ] ]
-                    [ text "el consumo adicional esperado por climas." ]
+                    [ text "el consumo calculado de climas adicionales. " ]
 
               else
                 text ""
-            , text " La ideas es pues ver que "
             , span
                 [ css [ Tw.text_color Theme.green_600 ] ]
-                [ text "lo generado por el PANEL SOLAR, " ]
-            , text "alcance para mínimo "
+                [ text "Lo generado por el PANEL SOLAR, " ]
+            , text "debe alcancanzar para "
             , span [ css [ Tw.text_color Theme.red_600 ] ]
                 [ text "el consumo con tarifa excedente (alto costo) " ]
-            , text " y a lo mejor también para algo del "
+            , text "y a lo mejor para "
             , span [ css [ Tw.text_color Theme.yellow_600 ] ]
-                [ text " consumo con subsidio (bajo costo). " ]
+                [ text "el consumo con subsidio (bajo costo)" ]
+            , text "."
             ]
         ]
         |> HtmlS.toUnstyled
@@ -169,8 +169,8 @@ type alias Clima =
 
 climasAdic : List Clima
 climasAdic =
-    [ { tons = 1.0, horasEnArranque = 2, tipoClima = Inverter, area = "Recamara de los niños", frecUso = Diario 9.0 }
-    , { tons = 1.5, horasEnArranque = 2, tipoClima = Normal, area = "Área Social", frecUso = Semanal 7.0 2 }
+    [ { tons = 1.5, horasEnArranque = 2, tipoClima = Normal, area = "Área Social", frecUso = Semanal 7.0 2 }
+    , { tons = 1.0, horasEnArranque = 2, tipoClima = Inverter, area = "Recamara de los niños", frecUso = Diario 9.0 }
     ]
 
 
@@ -202,10 +202,18 @@ capPanelesWatts =
     595
 
 
+consumoTodos =
+    Dict.fromList [ ( "Mamá de Yuri", [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ] ) ]
+
+
 consumoPaAtras : List Int
 consumoPaAtras =
-    [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ]
-        |> List.reverse
+    case Dict.get "Mamá de Yuri" consumoTodos of
+        Just x ->
+            List.reverse x
+
+        Nothing ->
+            List.repeat 12 0
 
 
 parcial : Float
@@ -246,28 +254,28 @@ kWhxTonHr clima =
     in
     case clima.frecUso of
         Diario horas ->
-            (horas - clima.horasEnArranque)
+            30
                 * clima.tons
-                * consumoOperacion
-                + clima.horasEnArranque
-                * clima.tons
-                * consumoArranque
-                * 30
+                * (consumoArranque
+                    * clima.horasEnArranque
+                    + consumoOperacion
+                    * (horas - clima.horasEnArranque)
+                  )
 
         Semanal horas veces ->
-            (if (clima.horasEnArranque * toFloat veces - horas) < 0 then
-                0
-
-             else
-                (horas - (toFloat veces * clima.horasEnArranque))
-                    * clima.tons
-                    * consumoOperacion
-            )
-                + clima.horasEnArranque
-                * toFloat veces
+            4.33
                 * clima.tons
-                * consumoArranque
-                * 4.33
+                * (if (horas - clima.horasEnArranque * toFloat veces) < 0 then
+                    0
+
+                   else
+                    (horas - (toFloat veces * clima.horasEnArranque))
+                        * consumoOperacion
+                        + (clima.horasEnArranque
+                            * toFloat veces
+                            * consumoArranque
+                          )
+                  )
 
         Mensual horas veces ->
             (if (clima.horasEnArranque * toFloat veces - horas) < 0 then

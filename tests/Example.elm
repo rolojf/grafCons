@@ -12,6 +12,7 @@ todos =
     Test.concat
         [ suite1
         , suite2
+        , suite3
         ]
 
 
@@ -24,6 +25,21 @@ suite1 =
         , test "mesSiguienteDic" (\_ -> Expect.equal (Main.mesSig Main.Dic) Main.Ene)
         , test "mesSiguientJule" (\_ -> Expect.equal (Main.mesSig Main.Jul) Main.Ago)
         , test "mesSiguienteEne" (\_ -> Expect.equal (Main.mesSig Main.Ene) Main.Feb)
+        ]
+
+
+suite3 : Test
+suite3 =
+    let
+        climaRecamara =
+            { tons = 1.0, horasEnArranque = 2, tipoClima = Main.Inverter, area = "Recamara de los niños", frecUso = Main.Diario 9.0 }
+
+        climaASocial =
+            { tons = 1.5, horasEnArranque = 2, tipoClima = Main.Normal, area = "Área Social", frecUso = Main.Semanal 7.0 2 }
+    in
+    describe "Validando el consumo de climas"
+        [ test "ClimaRecámara" (\_ -> Expect.equal (Main.kWhxTonHr climaRecamara) 159.0)
+        , test "ClimaASocial" (\_ -> Expect.within (Expect.Absolute 0.1) (Main.kWhxTonHr climaASocial) 49.362)
         ]
 
 
