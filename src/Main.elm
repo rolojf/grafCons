@@ -176,7 +176,7 @@ climasAdic =
 
 hayAdic : Bool
 hayAdic =
-    True
+    False
 
 
 adic : Array Float
@@ -199,16 +199,20 @@ paneles =
 
 
 capPanelesWatts =
-    595
+    550
 
 
 consumoTodos =
-    Dict.fromList [ ( "Mamá de Yuri", [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ] ) ]
+    Dict.fromList
+        [ ( "Mamá de Yuri", [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ] )
+        , ( "Eduardo Zanella R.", [ 127 + 326, 373, 877, 1007, 912, 682, 395, 370, 621, 1136, 1082, 635 ] )
+        , ( "Rosalinda Garza", [ 319, 239, 1013, 1835, 1634, 747, 329, 249, 512, 1604, 1650, 917 ] )
+        ]
 
 
 consumoPaAtras : List Int
 consumoPaAtras =
-    case Dict.get "Mamá de Yuri" consumoTodos of
+    case Dict.get "Rosalinda Garza" consumoTodos of
         Just x ->
             List.reverse x
 
@@ -223,7 +227,7 @@ parcial =
 
 mesMasAntiguo : Mes
 mesMasAntiguo =
-    Ago
+    Mar
 
 
 anioMasAntiguo : Int
