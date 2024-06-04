@@ -188,7 +188,7 @@ climasAdic =
 
 hayAdic : Bool
 hayAdic =
-    True
+    False
 
 
 adic : Array Float
@@ -215,7 +215,7 @@ bimestresDeHistorial =
 
 paneles : Float
 paneles =
-    6
+    7
 
 
 capPanelesWatts =
@@ -226,6 +226,7 @@ consumoTodos =
     Dict.fromList
         [ ( "Mamá de Yuri", [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ] )
         , ( "Jess", [ 809, 465, 1573, 1648, 882, 515, 648, 548, 1019, 1570, 1248, 422 ] )
+        , ( "Faby", [ 1206, 991, 954, 1444, 1580, 1517, 842, 809, 952, 701, 1536, 1519 ] )
         ]
 
 
@@ -239,14 +240,20 @@ consumoPaAtras =
             List.repeat 12 0
 
 
-parcial : Float
+parcial : Dict String Float
 parcial =
-    9 / 30.42
+    [ ( "Jess", 9 / 30.42 )
+    , ( "Faby", 8 / 30.0 )
+    ]
+        |> Dict.fromList
 
 
-mesMasAntiguo : Mes
+mesMasAntiguo : Dict String Mes
 mesMasAntiguo =
-    Feb
+    [ ( "Jess", Feb )
+    , ( "Faby", May )
+    ]
+        |> Dict.fromList
 
 
 anioMasAntiguo : Int
@@ -434,21 +441,30 @@ listadoDeMeses =
         |> List.concat
 
 
+elMes =
+    case Dict.get nombre mesMasAntiguo of
+        Just x ->
+            x
+
+        Nothing ->
+            Ene
+
+
 anyDictBase : AnyDict LlaveComparable MesAnio Int
 anyDictBase =
     let
         secMesesIdx : List Int
         secMesesIdx =
             List.range
-                (getMesNum mesMasAntiguo)
-                (bimestresDeHistorial * 2 + 1 + getMesNum mesMasAntiguo)
+                (getMesNum elMes)
+                (bimestresDeHistorial * 2 + 1 + getMesNum elMes)
                 |> List.map
                     (\x -> x - (((x - 1) // 12) * 12))
 
         secMeses2 =
             List.range
-                (getMesNum mesMasAntiguo)
-                (bimestresDeHistorial * 2 + 1 + getMesNum mesMasAntiguo)
+                (getMesNum elMes)
+                (bimestresDeHistorial * 2 + 1 + getMesNum elMes)
                 |> List.map
                     (\x -> (x - 1) // 12)
 
@@ -484,7 +500,7 @@ secBimestres =
                 Just ma ->
                     (mesAnioSig ma |> mesAnioSig) :: acVeces
         )
-        [ MesAnio mesMasAntiguo anioMasAntiguo ]
+        [ MesAnio elMes anioMasAntiguo ]
         (List.repeat bimestresDeHistorial 1)
         |> List.reverse
         |> Array.fromList
@@ -509,8 +525,16 @@ secBimCons =
 reparteAMeses : Int -> MesAnio -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
 reparteAMeses consumoDelBim mesInicDelBim elDict =
     let
+        elParcial =
+            case Dict.get nombre parcial of
+                Just x ->
+                    x
+
+                Nothing ->
+                    1 / 30
+
         uno =
-            round <| (1 - parcial) * 30.0 * toFloat consumoDelBim / 61
+            round <| (1 - elParcial) * 30.0 * toFloat consumoDelBim / 61
 
         dos =
             round <| 31.0 * toFloat consumoDelBim / 61
