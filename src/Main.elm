@@ -50,7 +50,7 @@ main =
                 ]
             ]
             [ text
-                ("Su Consumo vs Generación de Panel de "
+                ("Su Consumo vs Generación de Panel "
                     ++ format usLocale (capPanelesWatts * paneles / 1000)
                     ++ " kWp"
                 )
@@ -167,11 +167,23 @@ type alias Clima =
 -- * Valores Particulares
 
 
-climasAdic : List Clima
+nombre : String
+nombre =
+    "Jess"
+
+
+climasAdic : Dict String (List Clima)
 climasAdic =
-    [ { tons = 1.5, horasEnArranque = 2, tipoClima = Normal, area = "Área Social", frecUso = Semanal 7.0 2 }
-    , { tons = 1.0, horasEnArranque = 2, tipoClima = Inverter, area = "Recamara de los niños", frecUso = Diario 9.0 }
+    [ ( "Anterior"
+      , [ { tons = 1.5, horasEnArranque = 2, tipoClima = Normal, area = "Área Social", frecUso = Semanal 7.0 2 }
+        , { tons = 1.0, horasEnArranque = 2, tipoClima = Inverter, area = "Recamara de los niños", frecUso = Diario 9.0 }
+        ]
+      )
+    , ( "Jess"
+      , [ { tons = 1, horasEnArranque = 1, tipoClima = Inverter, area = "Cosina", frecUso = Diario 6.0 } ]
+      )
     ]
+        |> Dict.fromList
 
 
 hayAdic : Bool
@@ -182,8 +194,16 @@ hayAdic =
 adic : Array Float
 adic =
     let
+        climas =
+            case Dict.get nombre climasAdic of
+                Just x ->
+                    x
+
+                Nothing ->
+                    [ { tons = 999, horasEnArranque = 999, tipoClima = Normal, area = "Monterrey", frecUso = Diario 24.0 } ]
+
         consMax =
-            List.map kWhxTonHr climasAdic |> List.sum
+            List.map kWhxTonHr climas |> List.sum
     in
     List.map (\cadaMes -> consMax * cadaMes) reparteAdic |> Array.fromList
 
@@ -195,20 +215,23 @@ bimestresDeHistorial =
 
 paneles : Float
 paneles =
-    7
+    6
 
 
 capPanelesWatts =
-    595
+    545
 
 
 consumoTodos =
-    Dict.fromList [ ( "Mamá de Yuri", [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ] ) ]
+    Dict.fromList
+        [ ( "Mamá de Yuri", [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ] )
+        , ( "Jess", [ 809, 465, 1573, 1648, 882, 515, 648, 548, 1019, 1570, 1248, 422 ] )
+        ]
 
 
 consumoPaAtras : List Int
 consumoPaAtras =
-    case Dict.get "Mamá de Yuri" consumoTodos of
+    case Dict.get nombre consumoTodos of
         Just x ->
             List.reverse x
 
@@ -218,12 +241,12 @@ consumoPaAtras =
 
 parcial : Float
 parcial =
-    18 / 31
+    9 / 30.42
 
 
 mesMasAntiguo : Mes
 mesMasAntiguo =
-    Ago
+    Feb
 
 
 anioMasAntiguo : Int
