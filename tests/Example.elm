@@ -2,6 +2,7 @@ module Example exposing (todos)
 
 -- import Fuzz exposing (Fuzzer, int, list, string)
 
+import Datos
 import Dict.Any as Any
 import Expect exposing (Expectation)
 import Main
@@ -19,12 +20,12 @@ todos =
 suite1 : Test
 suite1 =
     describe "Probando la funcion que obtiene el número de mes"
-        [ test "Enero" (\_ -> Expect.equal (Main.getMesNum Main.Ene) 1)
-        , test "Septiembre" (\_ -> Expect.equal (Main.getMesNum Main.Sep) 9)
-        , test "Diciembre" (\_ -> Expect.equal (Main.getMesNum Main.Dic) 12)
-        , test "mesSiguienteDic" (\_ -> Expect.equal (Main.mesSig Main.Dic) Main.Ene)
-        , test "mesSiguientJule" (\_ -> Expect.equal (Main.mesSig Main.Jul) Main.Ago)
-        , test "mesSiguienteEne" (\_ -> Expect.equal (Main.mesSig Main.Ene) Main.Feb)
+        [ test "Enero" (\_ -> Expect.equal (Main.getMesNum Datos.Ene) 1)
+        , test "Septiembre" (\_ -> Expect.equal (Main.getMesNum Datos.Sep) 9)
+        , test "Diciembre" (\_ -> Expect.equal (Main.getMesNum Datos.Dic) 12)
+        , test "mesSiguienteDic" (\_ -> Expect.equal (Main.mesSig Datos.Dic) Datos.Ene)
+        , test "mesSiguientJule" (\_ -> Expect.equal (Main.mesSig Datos.Jul) Datos.Ago)
+        , test "mesSiguienteEne" (\_ -> Expect.equal (Main.mesSig Datos.Ene) Datos.Feb)
         ]
 
 
@@ -32,10 +33,10 @@ suite3 : Test
 suite3 =
     let
         climaRecamara =
-            { tons = 1.0, horasEnArranque = 2, tipoClima = Main.Inverter, area = "Recamara de los niños", frecUso = Main.Diario 9.0 }
+            { tons = 1.0, horasEnArranque = 2, tipoClima = Datos.Inverter, area = "Recamara de los niños", frecUso = Datos.Diario 9.0 }
 
         climaASocial =
-            { tons = 1.5, horasEnArranque = 2, tipoClima = Main.Normal, area = "Área Social", frecUso = Main.Semanal 7.0 2 }
+            { tons = 1.5, horasEnArranque = 2, tipoClima = Datos.Normal, area = "Área Social", frecUso = Datos.Semanal 7.0 2 }
     in
     describe "Validando el consumo de climas"
         [ test "ClimaRecámara" (\_ -> Expect.equal (Main.kWhxTonHr climaRecamara) 159.0)
@@ -47,16 +48,16 @@ suite2 : Test
 suite2 =
     let
         marzo =
-            { mes = Main.Mar, anio = 2022 }
+            { mes = Datos.Mar, anio = 2022 }
 
         abril =
-            { mes = Main.Abr, anio = 2022 }
+            { mes = Datos.Abr, anio = 2022 }
 
         diciembre =
-            { mes = Main.Dic, anio = 2023 }
+            { mes = Datos.Dic, anio = 2023 }
 
         enero =
-            { mes = Main.Ene, anio = 2024 }
+            { mes = Datos.Ene, anio = 2024 }
     in
     describe "Probando la funcion que regresa el siguiente mes"
         [ test "MesAnio Marzo" (\_ -> Expect.equal (Main.mesAnioSig marzo) abril)
