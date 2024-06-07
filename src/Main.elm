@@ -8,6 +8,7 @@ import Chart as C
 import Chart.Attributes as CA
 import Chart.Item as CI
 import Css.Global
+import Datos exposing (..)
 import Dict exposing (Dict)
 import Dict.Any as Any exposing (AnyDict)
 import FormatNumber exposing (format)
@@ -51,7 +52,7 @@ main =
             ]
             [ text
                 ("Su Consumo vs Generación de Panel "
-                    ++ format usLocale (capPanelesWatts * paneles / 1000)
+                    ++ format usLocale (datos.capPanelesWatts * datos.paneles / 1000)
                     ++ " kWp"
                 )
             ]
@@ -66,11 +67,11 @@ main =
                 ]
             ]
             [ text
-                (format usLocale (capPanelesWatts * paneles / 1000)
+                (format usLocale (datos.capPanelesWatts * datos.paneles / 1000)
                     ++ " kWp porque son "
-                    ++ String.fromFloat paneles
+                    ++ String.fromFloat datos.paneles
                     ++ " paneles por "
-                    ++ String.fromInt capPanelesWatts
+                    ++ String.fromInt datos.capPanelesWatts
                     ++ " watts cada uno / 1,000 "
                 )
             ]
@@ -96,12 +97,12 @@ main =
             , span [ css [ Tw.text_color Theme.amber_800 ] ]
                 [ text "barras café " ]
             , text " son el consumo en años previos. "
-            , if hayAdic then
+            , if datos.hayAdic then
                 text "Y se suma "
 
               else
                 text ""
-            , if hayAdic then
+            , if datos.hayAdic then
                 span [ css [ Tw.text_color Theme.sky_500 ] ]
                     [ text "el consumo calculado de climas adicionales. " ]
 
@@ -143,128 +144,22 @@ repartoXestacionalidad =
     Any.fromList getMesNum [ ( Ene, 0.22 ), ( Feb, 0.2 ), ( Mar, 0.1 ), ( Abr, 0.25 ), ( May, 0.8 ), ( Jun, 1.0 ), ( Jul, 1.0 ), ( Ago, 0.85 ), ( Sep, 0.7 ), ( Oct, 0.3 ), ( Nov, 0.1 ), ( Dic, 0.2 ) ]
 
 
-type Frecuente
-    = Diario Float
-    | Semanal Float Int
-    | Mensual Float Int
 
-
-type TipoClima
-    = Normal
-    | Inverter
-
-
-type alias Clima =
-    { tons : Float
-    , horasEnArranque : Float
-    , tipoClima : TipoClima
-    , area : String
-    , frecUso : Frecuente
-    }
-
-
-
--- * Valores Particulares
-
-
-nombre : String
-nombre =
-    "Jess"
-
-
-climasAdic : Dict String (List Clima)
-climasAdic =
-    [ ( "Anterior"
-      , [ { tons = 1.5, horasEnArranque = 2, tipoClima = Normal, area = "Área Social", frecUso = Semanal 7.0 2 }
-        , { tons = 1.0, horasEnArranque = 2, tipoClima = Inverter, area = "Recamara de los niños", frecUso = Diario 9.0 }
-        ]
-      )
-    , ( "Jess"
-      , [ { tons = 1, horasEnArranque = 1, tipoClima = Inverter, area = "Cosina", frecUso = Diario 6.0 } ]
-      )
-    ]
-        |> Dict.fromList
-
-
-hayAdic : Bool
-hayAdic =
-    False
+-- * Funciones Habilitadoras
 
 
 adic : Array Float
 adic =
     let
-        climas =
-            case Dict.get nombre climasAdic of
-                Just x ->
-                    x
-
-                Nothing ->
-                    [ { tons = 999, horasEnArranque = 999, tipoClima = Normal, area = "Monterrey", frecUso = Diario 24.0 } ]
-
         consMax =
-            List.map kWhxTonHr climas |> List.sum
+            List.map kWhxTonHr datos.climasAdic |> List.sum
     in
     List.map (\cadaMes -> consMax * cadaMes) reparteAdic |> Array.fromList
 
 
-bimestresDeHistorial : Int
-bimestresDeHistorial =
-    12
-
-
-paneles : Float
-paneles =
-    7
-
-
-capPanelesWatts =
-    545
-
-
-consumoTodos =
-    Dict.fromList
-        [ ( "Mamá de Yuri", [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ] )
-        , ( "Eduardo Zanella R.", [ 127 + 326, 373, 877, 1007, 912, 682, 395, 370, 621, 1136, 1082, 635 ] )
-        , ( "Rosalinda Garza", [ 319, 239, 1013, 1835, 1634, 747, 329, 249, 512, 1604, 1650, 917 ] )
-        , ( "Jess", [ 809, 465, 1573, 1648, 882, 515, 648, 548, 1019, 1570, 1248, 422 ] )
-        , ( "Faby", [ 1206, 991, 954, 1444, 1580, 1517, 842, 809, 952, 701, 1536, 1519 ] )
-        ]
-
-
 consumoPaAtras : List Int
 consumoPaAtras =
-    case Dict.get nombre consumoTodos of
-        Just x ->
-            List.reverse x
-
-        Nothing ->
-            List.repeat 12 0
-
-
-parcial : Dict String Float
-parcial =
-    [ ( "Jess", 9 / 30.42 )
-    , ( "Faby", 8 / 30.0 )
-    ]
-        |> Dict.fromList
-
-
-mesMasAntiguo : Dict String Mes
-mesMasAntiguo =
-    [ ( "Jess", Feb )
-    , ( "Faby", May )
-    ]
-        |> Dict.fromList
-
-
-anioMasAntiguo : Int
-anioMasAntiguo =
-    2022
-
-
-
--- * Funciones Habilitadoras
+    List.reverse datos.consumoTodos
 
 
 kWhxTonHr : Clima -> Float
@@ -322,21 +217,6 @@ kWhxTonHr clima =
                 * toFloat veces
                 * clima.tons
                 * consumoArranque
-
-
-type Mes
-    = Ene
-    | Feb
-    | Mar
-    | Abr
-    | May
-    | Jun
-    | Jul
-    | Ago
-    | Sep
-    | Oct
-    | Nov
-    | Dic
 
 
 type alias LlaveComparable =
@@ -443,30 +323,21 @@ listadoDeMeses =
         |> List.concat
 
 
-elMes =
-    case Dict.get nombre mesMasAntiguo of
-        Just x ->
-            x
-
-        Nothing ->
-            Ene
-
-
 anyDictBase : AnyDict LlaveComparable MesAnio Int
 anyDictBase =
     let
         secMesesIdx : List Int
         secMesesIdx =
             List.range
-                (getMesNum elMes)
-                (bimestresDeHistorial * 2 + 1 + getMesNum elMes)
+                (getMesNum datos.mesMasAntiguo)
+                (datos.bimestresDeHistorial * 2 + 1 + getMesNum datos.mesMasAntiguo)
                 |> List.map
                     (\x -> x - (((x - 1) // 12) * 12))
 
         secMeses2 =
             List.range
-                (getMesNum elMes)
-                (bimestresDeHistorial * 2 + 1 + getMesNum elMes)
+                (getMesNum datos.mesMasAntiguo)
+                (datos.bimestresDeHistorial * 2 + 1 + getMesNum datos.mesMasAntiguo)
                 |> List.map
                     (\x -> (x - 1) // 12)
 
@@ -482,7 +353,7 @@ anyDictBase =
                 (Array.get (idx - 1) mesesTy
                     |> Maybe.withDefault Nov
                 )
-                (anioMasAntiguo + addAnio)
+                (datos.anioMasAntiguo + addAnio)
             , 0
             )
         )
@@ -502,8 +373,8 @@ secBimestres =
                 Just ma ->
                     (mesAnioSig ma |> mesAnioSig) :: acVeces
         )
-        [ MesAnio elMes anioMasAntiguo ]
-        (List.repeat bimestresDeHistorial 1)
+        [ MesAnio datos.mesMasAntiguo datos.anioMasAntiguo ]
+        (List.repeat datos.bimestresDeHistorial 1)
         |> List.reverse
         |> Array.fromList
 
@@ -527,16 +398,8 @@ secBimCons =
 reparteAMeses : Int -> MesAnio -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
 reparteAMeses consumoDelBim mesInicDelBim elDict =
     let
-        elParcial =
-            case Dict.get nombre parcial of
-                Just x ->
-                    x
-
-                Nothing ->
-                    1 / 30
-
         uno =
-            round <| (1 - elParcial) * 30.0 * toFloat consumoDelBim / 61
+            round <| (1 - datos.parcial) * 30.0 * toFloat consumoDelBim / 61
 
         dos =
             round <| 31.0 * toFloat consumoDelBim / 61
@@ -582,7 +445,7 @@ obtnConsumoDelMesPenultimoAnio : Mes -> Int
 obtnConsumoDelMesPenultimoAnio mes =
     case
         Any.get
-            (MesAnio mes anioMasAntiguo)
+            (MesAnio mes datos.anioMasAntiguo)
             reparteConsumo
     of
         Just consumoEse ->
@@ -591,7 +454,7 @@ obtnConsumoDelMesPenultimoAnio mes =
         Nothing ->
             case
                 Any.get
-                    (MesAnio mes (anioMasAntiguo + 1))
+                    (MesAnio mes (datos.anioMasAntiguo + 1))
                     reparteConsumo
             of
                 Just consumoAhoraEste ->
@@ -605,7 +468,7 @@ obtnConsumoDelMesUltimoAnio : Mes -> Int
 obtnConsumoDelMesUltimoAnio mes =
     case
         Any.get
-            (MesAnio mes (anioMasAntiguo + 2))
+            (MesAnio mes (datos.anioMasAntiguo + 2))
             reparteConsumo
     of
         Just consumoEse ->
@@ -614,7 +477,7 @@ obtnConsumoDelMesUltimoAnio mes =
         Nothing ->
             case
                 Any.get
-                    (MesAnio mes (anioMasAntiguo + 1))
+                    (MesAnio mes (datos.anioMasAntiguo + 1))
                     reparteConsumo
             of
                 Just consumoAhoraEste ->
@@ -626,7 +489,7 @@ obtnConsumoDelMesUltimoAnio mes =
 
 obtenGenera : Int -> Int -> Float
 obtenGenera m1 m2 =
-    (paneles * capPanelesWatts / (4 * 595))
+    (datos.paneles * datos.capPanelesWatts / (4 * 595))
         * ((Array.get (m1 - 1) genera |> Maybe.withDefault 0)
             + (Array.get (m2 - 1) genera |> Maybe.withDefault 0)
           )
@@ -650,7 +513,7 @@ consumo =
                     (getMesNum month)
                     (1 + getMesNum month)
             , adicional =
-                if hayAdic then
+                if datos.hayAdic then
                     case Maybe.map2 (+) (Array.get (getMesNum month) adic) (Array.get (getMesNum month - 1) adic) of
                         Just laSuma ->
                             laSuma
@@ -750,7 +613,7 @@ grafica =
             , C.bar (\reg -> reg.gen) [ CA.color CA.green ]
                 |> C.named
                     ("Generada x Panel "
-                        ++ format usLocale (capPanelesWatts * paneles / 1000)
+                        ++ format usLocale (datos.capPanelesWatts * datos.paneles / 1000)
                         ++ " kWp"
                     )
             ]
