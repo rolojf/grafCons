@@ -350,36 +350,35 @@ secBimCons caso cconsumo =
 -- * Repartición del Consumo
 
 
-reparteAMeses : Int -> MesAnio -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
-reparteAMeses consumoDelBim mesInicDelBim elDict =
-    let
-        uno =
-            round <| (1 - datos.parcial) * 30.0 * toFloat consumoDelBim / 61
-
-        dos =
-            round <| 31.0 * toFloat consumoDelBim / 61
-
-        tres =
-            consumoDelBim - uno - dos
-    in
-    elDict
-        |> Any.update
-            mesInicDelBim
-            (Maybe.map ((+) uno))
-        |> Any.update
-            (mesAnioSig mesInicDelBim)
-            (Maybe.map ((+) dos))
-        |> Any.update
-            (mesAnioSig (mesAnioSig mesInicDelBim))
-            (Maybe.map ((+) tres))
-
-
 reparteConsumo : DatosP -> AnyDict LlaveComparable MesAnio Int
 reparteConsumo cas0 =
     let
         consumoPaAtras : DatosP -> List Int
         consumoPaAtras caso =
             List.reverse caso.consumoTodos
+
+        reparteAMeses : DatosP -> Int -> MesAnio -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
+        reparteAMeses caso consumoDelBim mesInicDelBim elDict =
+            let
+                uno =
+                    round <| (1 - caso.parcial) * 30.0 * toFloat consumoDelBim / 61
+
+                dos =
+                    round <| 31.0 * toFloat consumoDelBim / 61
+
+                tres =
+                    consumoDelBim - uno - dos
+            in
+            elDict
+                |> Any.update
+                    mesInicDelBim
+                    (Maybe.map ((+) uno))
+                |> Any.update
+                    (mesAnioSig mesInicDelBim)
+                    (Maybe.map ((+) dos))
+                |> Any.update
+                    (mesAnioSig (mesAnioSig mesInicDelBim))
+                    (Maybe.map ((+) tres))
 
         anyDictBase : DatosP -> AnyDict LlaveComparable MesAnio Int
         anyDictBase caso =
@@ -420,6 +419,7 @@ reparteConsumo cas0 =
         (\cadaElem elDic ->
             elDic
                 |> reparteAMeses
+                    cas0
                     (Tuple.second cadaElem)
                     (Tuple.first cadaElem)
         )
