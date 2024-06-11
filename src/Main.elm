@@ -355,7 +355,8 @@ reparteConsumo :
     ->
         ( AnyDict LlaveComparable MesAnio Int
         , { consumoPaAtras : List Int
-          , reparteAMeses : AnyDict LlaveComparable MesAnio Int
+
+          -- : AnyDict LlaveComparable MesAnio Int
           , anyDictBase : AnyDict LlaveComparable MesAnio Int
           }
         )
@@ -422,12 +423,6 @@ reparteConsumo cas0 =
                 zipSec
                 |> Any.fromList
                     convierteLlave
-
-        palTest =
-            { consumoPaAtras = consumoPaAtras
-            , reparteAMeses = reparteAMeses
-            , anyDictBase = anyDictBase
-            }
     in
     ( Array.foldl
         (\cadaElem elDic ->
@@ -439,7 +434,16 @@ reparteConsumo cas0 =
         )
         (anyDictBase cas0)
         (secBimCons cas0 (consumoPaAtras cas0))
-    , palTest
+    , { consumoPaAtras = consumoPaAtras cas0
+
+      {- , reparteAMeses =
+         reparteAMeses
+             cas0
+             (Tuple.first cadaElem)
+             (Tuple.second cadaElem)
+      -}
+      , anyDictBase = anyDictBase cas0
+      }
     )
 
 

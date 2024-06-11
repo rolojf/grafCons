@@ -2,6 +2,7 @@ module Example exposing (todos)
 
 -- import Fuzz exposing (Fuzzer, int, list, string)
 
+import Chart.Item exposing (Any)
 import Datos
 import Dict.Any as Any
 import Expect exposing (Expectation)
@@ -65,9 +66,9 @@ suite2 =
         , test "Conviete a comparable" (\_ -> Expect.equal (Main.convierteLlave abril) ( "Abr", 2022 ))
         , test "Suma de watts anuales"
             (\_ ->
-                Expect.lessThan 2
-                    (List.sum Main.consumoPaAtras
-                        - (Any.values Main.reparteConsumo |> List.sum)
+                Expect.lessThan 1
+                    ((Datos.datosParaTest1 |> Main.reparteConsumo |> Tuple.second |> .consumoPaAtras |> List.sum)
+                        - (Datos.datosParaTest1 |> Main.reparteConsumo |> Tuple.first |> Any.values |> List.sum)
                     )
             )
 
