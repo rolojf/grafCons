@@ -350,7 +350,15 @@ secBimCons caso cconsumo =
 -- * Repartición del Consumo
 
 
-reparteConsumo : DatosP -> AnyDict LlaveComparable MesAnio Int
+reparteConsumo :
+    DatosP
+    ->
+        ( AnyDict LlaveComparable MesAnio Int
+        , { consumoPaAtras : List Int
+          , reparteAMeses : AnyDict LlaveComparable MesAnio Int
+          , anyDictBase : AnyDict LlaveComparable MesAnio Int
+          }
+        )
 reparteConsumo cas0 =
     let
         consumoPaAtras : DatosP -> List Int
@@ -414,8 +422,14 @@ reparteConsumo cas0 =
                 zipSec
                 |> Any.fromList
                     convierteLlave
+
+        palTest =
+            { consumoPaAtras = consumoPaAtras
+            , reparteAMeses = reparteAMeses
+            , anyDictBase = anyDictBase
+            }
     in
-    Array.foldl
+    ( Array.foldl
         (\cadaElem elDic ->
             elDic
                 |> reparteAMeses
@@ -425,6 +439,8 @@ reparteConsumo cas0 =
         )
         (anyDictBase cas0)
         (secBimCons cas0 (consumoPaAtras cas0))
+    , palTest
+    )
 
 
 obtnSub : Mes -> Float
@@ -494,12 +510,12 @@ consumo cas0 =
     Array.map
         (\month ->
             { dosAtras =
-                obtnConsumoDelMesPenultimoAnio cas0 (reparteConsumo cas0) month
-                    + obtnConsumoDelMesPenultimoAnio cas0 (reparteConsumo cas0) (mesSig month)
+                obtnConsumoDelMesPenultimoAnio cas0 (Tuple.first (reparteConsumo cas0)) month
+                    + obtnConsumoDelMesPenultimoAnio cas0 (Tuple.first (reparteConsumo cas0)) (mesSig month)
                     |> toFloat
             , unoAtras =
-                obtnConsumoDelMesUltimoAnio cas0 (reparteConsumo cas0) month
-                    + obtnConsumoDelMesUltimoAnio cas0 (reparteConsumo cas0) (mesSig month)
+                obtnConsumoDelMesUltimoAnio cas0 (Tuple.first (reparteConsumo cas0)) month
+                    + obtnConsumoDelMesUltimoAnio cas0 (Tuple.first (reparteConsumo cas0)) (mesSig month)
                     |> toFloat
             , subsidio =
                 obtnSub month + obtnSub (mesSig month)
