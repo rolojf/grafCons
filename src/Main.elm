@@ -436,52 +436,6 @@ obtnSub mmes =
         450.0
 
 
-obtnConsumoDelMesPenultimoAnio : DatosP -> AnyDict LlaveComparable MesAnio Int -> Mes -> Int
-obtnConsumoDelMesPenultimoAnio caso consRepartido mes =
-    case
-        Any.get
-            (MesAnio mes caso.anioMasAntiguo)
-            consRepartido
-    of
-        Just consumoEse ->
-            consumoEse
-
-        Nothing ->
-            case
-                Any.get
-                    (MesAnio mes (caso.anioMasAntiguo + 1))
-                    consRepartido
-            of
-                Just consumoAhoraEste ->
-                    consumoAhoraEste
-
-                Nothing ->
-                    999999
-
-
-obtnConsumoDelMesUltimoAnio : DatosP -> AnyDict LlaveComparable MesAnio Int -> Mes -> Int
-obtnConsumoDelMesUltimoAnio caso consRepartido mes =
-    case
-        Any.get
-            (MesAnio mes (caso.anioMasAntiguo + 2))
-            consRepartido
-    of
-        Just consumoEse ->
-            consumoEse
-
-        Nothing ->
-            case
-                Any.get
-                    (MesAnio mes (caso.anioMasAntiguo + 1))
-                    consRepartido
-            of
-                Just consumoAhoraEste ->
-                    consumoAhoraEste
-
-                Nothing ->
-                    999999
-
-
 obtenGenera : DatosP -> Int -> Int -> Float
 obtenGenera caso m1 m2 =
     (caso.paneles * toFloat caso.capPanelesWatts / (4 * 595))
@@ -491,27 +445,72 @@ obtenGenera caso m1 m2 =
 
 
 consumo : DatosP -> List { dosAtras : Float, unoAtras : Float, subsidio : Float, gen : Float, adicional : Float }
-consumo caso =
+consumo cas0 =
+    let
+        obtnConsumoDelMesPenultimoAnio : DatosP -> AnyDict LlaveComparable MesAnio Int -> Mes -> Int
+        obtnConsumoDelMesPenultimoAnio caso consRepartido mes =
+            case
+                Any.get
+                    (MesAnio mes caso.anioMasAntiguo)
+                    consRepartido
+            of
+                Just consumoEse ->
+                    consumoEse
+
+                Nothing ->
+                    case
+                        Any.get
+                            (MesAnio mes (caso.anioMasAntiguo + 1))
+                            consRepartido
+                    of
+                        Just consumoAhoraEste ->
+                            consumoAhoraEste
+
+                        Nothing ->
+                            999999
+
+        obtnConsumoDelMesUltimoAnio : DatosP -> AnyDict LlaveComparable MesAnio Int -> Mes -> Int
+        obtnConsumoDelMesUltimoAnio caso consRepartido mes =
+            case
+                Any.get
+                    (MesAnio mes (caso.anioMasAntiguo + 2))
+                    consRepartido
+            of
+                Just consumoEse ->
+                    consumoEse
+
+                Nothing ->
+                    case
+                        Any.get
+                            (MesAnio mes (caso.anioMasAntiguo + 1))
+                            consRepartido
+                    of
+                        Just consumoAhoraEste ->
+                            consumoAhoraEste
+
+                        Nothing ->
+                            999999
+    in
     Array.map
         (\month ->
             { dosAtras =
-                obtnConsumoDelMesPenultimoAnio caso (reparteConsumo caso) month
-                    + obtnConsumoDelMesPenultimoAnio caso (reparteConsumo caso) (mesSig month)
+                obtnConsumoDelMesPenultimoAnio cas0 (reparteConsumo cas0) month
+                    + obtnConsumoDelMesPenultimoAnio cas0 (reparteConsumo cas0) (mesSig month)
                     |> toFloat
             , unoAtras =
-                obtnConsumoDelMesUltimoAnio caso (reparteConsumo caso) month
-                    + obtnConsumoDelMesUltimoAnio caso (reparteConsumo caso) (mesSig month)
+                obtnConsumoDelMesUltimoAnio cas0 (reparteConsumo cas0) month
+                    + obtnConsumoDelMesUltimoAnio cas0 (reparteConsumo cas0) (mesSig month)
                     |> toFloat
             , subsidio =
                 obtnSub month + obtnSub (mesSig month)
             , gen =
                 obtenGenera
-                    caso
+                    cas0
                     (getMesNum month)
                     (1 + getMesNum month)
             , adicional =
-                if caso.hayAdic then
-                    case Maybe.map2 (+) (Array.get (getMesNum month) (adic caso)) (Array.get (getMesNum month - 1) (adic caso)) of
+                if cas0.hayAdic then
+                    case Maybe.map2 (+) (Array.get (getMesNum month) (adic cas0)) (Array.get (getMesNum month - 1) (adic cas0)) of
                         Just laSuma ->
                             laSuma
 
