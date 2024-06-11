@@ -148,11 +148,11 @@ repartoXestacionalidad =
 -- * Funciones Habilitadoras
 
 
-adic : Array Float
-adic =
+adic : DatosP -> Array Float
+adic caso =
     let
         consMax =
-            List.map kWhxTonHr datos.climasAdic |> List.sum
+            List.map kWhxTonHr caso.climasAdic |> List.sum
     in
     List.map (\cadaMes -> consMax * cadaMes) reparteAdic |> Array.fromList
 
@@ -512,7 +512,7 @@ consumo caso =
                     (1 + getMesNum month)
             , adicional =
                 if caso.hayAdic then
-                    case Maybe.map2 (+) (Array.get (getMesNum month) adic) (Array.get (getMesNum month - 1) adic) of
+                    case Maybe.map2 (+) (Array.get (getMesNum month) (adic caso)) (Array.get (getMesNum month - 1) (adic caso)) of
                         Just laSuma ->
                             laSuma
 
