@@ -441,12 +441,12 @@ obtnSub mmes =
         450.0
 
 
-obtnConsumoDelMesPenultimoAnio : Mes -> Int
-obtnConsumoDelMesPenultimoAnio mes =
+obtnConsumoDelMesPenultimoAnio : DatosP -> AnyDict LlaveComparable MesAnio Int -> Mes -> Int
+obtnConsumoDelMesPenultimoAnio caso consRepartido mes =
     case
         Any.get
-            (MesAnio mes datos.anioMasAntiguo)
-            reparteConsumo
+            (MesAnio mes caso.anioMasAntiguo)
+            consRepartido
     of
         Just consumoEse ->
             consumoEse
@@ -454,8 +454,8 @@ obtnConsumoDelMesPenultimoAnio mes =
         Nothing ->
             case
                 Any.get
-                    (MesAnio mes (datos.anioMasAntiguo + 1))
-                    reparteConsumo
+                    (MesAnio mes (caso.anioMasAntiguo + 1))
+                    consRepartido
             of
                 Just consumoAhoraEste ->
                     consumoAhoraEste
@@ -464,12 +464,12 @@ obtnConsumoDelMesPenultimoAnio mes =
                     999999
 
 
-obtnConsumoDelMesUltimoAnio : Mes -> Int
-obtnConsumoDelMesUltimoAnio mes =
+obtnConsumoDelMesUltimoAnio : DatosP -> AnyDict LlaveComparable MesAnio Int -> Mes -> Int
+obtnConsumoDelMesUltimoAnio caso consRepartido mes =
     case
         Any.get
-            (MesAnio mes (datos.anioMasAntiguo + 2))
-            reparteConsumo
+            (MesAnio mes (caso.anioMasAntiguo + 2))
+            consRepartido
     of
         Just consumoEse ->
             consumoEse
@@ -477,8 +477,8 @@ obtnConsumoDelMesUltimoAnio mes =
         Nothing ->
             case
                 Any.get
-                    (MesAnio mes (datos.anioMasAntiguo + 1))
-                    reparteConsumo
+                    (MesAnio mes (caso.anioMasAntiguo + 1))
+                    consRepartido
             of
                 Just consumoAhoraEste ->
                     consumoAhoraEste
@@ -499,12 +499,12 @@ consumo =
     Array.map
         (\month ->
             { dosAtras =
-                obtnConsumoDelMesPenultimoAnio month
-                    + obtnConsumoDelMesPenultimoAnio (mesSig month)
+                obtnConsumoDelMesPenultimoAnio datos reparteConsumo month
+                    + obtnConsumoDelMesPenultimoAnio datos reparteConsumo (mesSig month)
                     |> toFloat
             , unoAtras =
-                obtnConsumoDelMesUltimoAnio month
-                    + obtnConsumoDelMesUltimoAnio (mesSig month)
+                obtnConsumoDelMesUltimoAnio datos reparteConsumo month
+                    + obtnConsumoDelMesUltimoAnio datos reparteConsumo (mesSig month)
                     |> toFloat
             , subsidio =
                 obtnSub month + obtnSub (mesSig month)
