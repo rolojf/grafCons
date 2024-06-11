@@ -157,11 +157,6 @@ adic caso =
     List.map (\cadaMes -> consMax * cadaMes) reparteAdic |> Array.fromList
 
 
-consumoPaAtras : List Int
-consumoPaAtras =
-    List.reverse datos.consumoTodos
-
-
 kWhxTonHr : Clima -> Float
 kWhxTonHr clima =
     let
@@ -382,6 +377,10 @@ reparteAMeses consumoDelBim mesInicDelBim elDict =
 reparteConsumo : DatosP -> AnyDict LlaveComparable MesAnio Int
 reparteConsumo cas0 =
     let
+        consumoPaAtras : DatosP -> List Int
+        consumoPaAtras caso =
+            List.reverse caso.consumoTodos
+
         anyDictBase : DatosP -> AnyDict LlaveComparable MesAnio Int
         anyDictBase caso =
             let
@@ -425,7 +424,7 @@ reparteConsumo cas0 =
                     (Tuple.first cadaElem)
         )
         (anyDictBase cas0)
-        (secBimCons cas0 consumoPaAtras)
+        (secBimCons cas0 (consumoPaAtras cas0))
 
 
 obtnSub : Mes -> Float
