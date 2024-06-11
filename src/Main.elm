@@ -323,45 +323,6 @@ listadoDeMeses =
         |> List.concat
 
 
-anyDictBase : AnyDict LlaveComparable MesAnio Int
-anyDictBase =
-    let
-        secMesesIdx : List Int
-        secMesesIdx =
-            List.range
-                (getMesNum datos.mesMasAntiguo)
-                (datos.bimestresDeHistorial * 2 + 1 + getMesNum datos.mesMasAntiguo)
-                |> List.map
-                    (\x -> x - (((x - 1) // 12) * 12))
-
-        secMeses2 =
-            List.range
-                (getMesNum datos.mesMasAntiguo)
-                (datos.bimestresDeHistorial * 2 + 1 + getMesNum datos.mesMasAntiguo)
-                |> List.map
-                    (\x -> (x - 1) // 12)
-
-        zipSec =
-            List.zip secMesesIdx secMeses2
-
-        _ =
-            Debug.log "zipSec" zipSec
-    in
-    List.map
-        (\( idx, addAnio ) ->
-            ( MesAnio
-                (Array.get (idx - 1) mesesTy
-                    |> Maybe.withDefault Nov
-                )
-                (datos.anioMasAntiguo + addAnio)
-            , 0
-            )
-        )
-        zipSec
-        |> Any.fromList
-            convierteLlave
-
-
 secBimCons : DatosP -> List Int -> Array ( MesAnio, Int )
 secBimCons caso cconsumo =
     let
@@ -418,8 +379,44 @@ reparteAMeses consumoDelBim mesInicDelBim elDict =
             (Maybe.map ((+) tres))
 
 
-reparteConsumo : AnyDict LlaveComparable MesAnio Int
-reparteConsumo =
+reparteConsumo : DatosP -> AnyDict LlaveComparable MesAnio Int
+reparteConsumo cas0 =
+    let
+        anyDictBase : DatosP -> AnyDict LlaveComparable MesAnio Int
+        anyDictBase caso =
+            let
+                secMesesIdx : List Int
+                secMesesIdx =
+                    List.range
+                        (getMesNum caso.mesMasAntiguo)
+                        (caso.bimestresDeHistorial * 2 + 1 + getMesNum caso.mesMasAntiguo)
+                        |> List.map
+                            (\x -> x - (((x - 1) // 12) * 12))
+
+                secMeses2 =
+                    List.range
+                        (getMesNum caso.mesMasAntiguo)
+                        (caso.bimestresDeHistorial * 2 + 1 + getMesNum caso.mesMasAntiguo)
+                        |> List.map
+                            (\x -> (x - 1) // 12)
+
+                zipSec =
+                    List.zip secMesesIdx secMeses2
+            in
+            List.map
+                (\( idx, addAnio ) ->
+                    ( MesAnio
+                        (Array.get (idx - 1) mesesTy
+                            |> Maybe.withDefault Nov
+                        )
+                        (caso.anioMasAntiguo + addAnio)
+                    , 0
+                    )
+                )
+                zipSec
+                |> Any.fromList
+                    convierteLlave
+    in
     Array.foldl
         (\cadaElem elDic ->
             elDic
@@ -427,8 +424,8 @@ reparteConsumo =
                     (Tuple.second cadaElem)
                     (Tuple.first cadaElem)
         )
-        anyDictBase
-        (secBimCons datos consumoPaAtras)
+        (anyDictBase cas0)
+        (secBimCons cas0 consumoPaAtras)
 
 
 obtnSub : Mes -> Float
@@ -494,26 +491,27 @@ obtenGenera caso m1 m2 =
           )
 
 
-consumo =
+consumo : DatosP -> List { dosAtras : Float, unoAtras : Float, subsidio : Float, gen : Float, adicional : Float }
+consumo caso =
     Array.map
         (\month ->
             { dosAtras =
-                obtnConsumoDelMesPenultimoAnio datos reparteConsumo month
-                    + obtnConsumoDelMesPenultimoAnio datos reparteConsumo (mesSig month)
+                obtnConsumoDelMesPenultimoAnio caso (reparteConsumo caso) month
+                    + obtnConsumoDelMesPenultimoAnio caso (reparteConsumo caso) (mesSig month)
                     |> toFloat
             , unoAtras =
-                obtnConsumoDelMesUltimoAnio datos reparteConsumo month
-                    + obtnConsumoDelMesUltimoAnio datos reparteConsumo (mesSig month)
+                obtnConsumoDelMesUltimoAnio caso (reparteConsumo caso) month
+                    + obtnConsumoDelMesUltimoAnio caso (reparteConsumo caso) (mesSig month)
                     |> toFloat
             , subsidio =
                 obtnSub month + obtnSub (mesSig month)
             , gen =
                 obtenGenera
-                    datos
+                    caso
                     (getMesNum month)
                     (1 + getMesNum month)
             , adicional =
-                if datos.hayAdic then
+                if caso.hayAdic then
                     case Maybe.map2 (+) (Array.get (getMesNum month) adic) (Array.get (getMesNum month - 1) adic) of
                         Just laSuma ->
                             laSuma
@@ -617,5 +615,5 @@ grafica =
                         ++ " kWp"
                     )
             ]
-            consumo
+            (consumo datos)
         ]
