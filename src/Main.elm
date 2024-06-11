@@ -362,28 +362,27 @@ anyDictBase =
             convierteLlave
 
 
-secBimestres : Array MesAnio
-secBimestres =
-    List.foldl
-        (\_ acVeces ->
-            case List.head acVeces of
-                Nothing ->
-                    MesAnio Nov 9999 :: acVeces
-
-                Just ma ->
-                    (mesAnioSig ma |> mesAnioSig) :: acVeces
-        )
-        [ MesAnio datos.mesMasAntiguo datos.anioMasAntiguo ]
-        (List.repeat datos.bimestresDeHistorial 1)
-        |> List.reverse
-        |> Array.fromList
-
-
-secBimCons : Array ( MesAnio, Int )
-secBimCons =
+secBimCons : DatosP -> List Int -> Array ( MesAnio, Int )
+secBimCons caso cconsumo =
     let
+        secBimestres : Array MesAnio
+        secBimestres =
+            List.foldl
+                (\_ acVeces ->
+                    case List.head acVeces of
+                        Nothing ->
+                            MesAnio Nov 9999 :: acVeces
+
+                        Just ma ->
+                            (mesAnioSig ma |> mesAnioSig) :: acVeces
+                )
+                [ MesAnio caso.mesMasAntiguo caso.anioMasAntiguo ]
+                (List.repeat caso.bimestresDeHistorial 1)
+                |> List.reverse
+                |> Array.fromList
+
         consumoArray =
-            Array.fromList consumoPaAtras
+            Array.fromList cconsumo
     in
     Array.map2
         (\bim cons -> ( bim, cons ))
@@ -429,7 +428,7 @@ reparteConsumo =
                     (Tuple.first cadaElem)
         )
         anyDictBase
-        secBimCons
+        (secBimCons datos consumoPaAtras)
 
 
 obtnSub : Mes -> Float
