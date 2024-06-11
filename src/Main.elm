@@ -487,9 +487,9 @@ obtnConsumoDelMesUltimoAnio mes =
                     999999
 
 
-obtenGenera : Int -> Int -> Float
-obtenGenera m1 m2 =
-    (datos.paneles * datos.capPanelesWatts / (4 * 595))
+obtenGenera : DatosP -> Int -> Int -> Float
+obtenGenera caso m1 m2 =
+    (caso.paneles * toFloat caso.capPanelesWatts / (4 * 595))
         * ((Array.get (m1 - 1) genera |> Maybe.withDefault 0)
             + (Array.get (m2 - 1) genera |> Maybe.withDefault 0)
           )
@@ -510,6 +510,7 @@ consumo =
                 obtnSub month + obtnSub (mesSig month)
             , gen =
                 obtenGenera
+                    datos
                     (getMesNum month)
                     (1 + getMesNum month)
             , adicional =
