@@ -369,10 +369,10 @@ reparteConsumo cas0 =
         reparteAMeses consumoDelBim mesInicDelBim elDict =
             let
                 uno =
-                    round <| (1 - cas0.parcial) * 30.0 * toFloat consumoDelBim / 61
+                    round <| (1 - cas0.parcial) * 30.0 * (toFloat consumoDelBim / 60.0)
 
                 dos =
-                    round <| 31.0 * toFloat consumoDelBim / 61
+                    round <| 30.0 * (toFloat consumoDelBim / 60.0)
 
                 tres =
                     consumoDelBim - uno - dos
@@ -405,9 +405,6 @@ reparteConsumo cas0 =
                         (cas0.bimestresDeHistorial * 2 + 1 + getMesNum cas0.mesMasAntiguo)
                         |> List.map
                             (\x -> (x - 1) // 12)
-
-                zipSec =
-                    List.zip secMesesIdx secMeses2
             in
             List.map
                 (\( idx, addAnio ) ->
@@ -419,7 +416,7 @@ reparteConsumo cas0 =
                     , 0
                     )
                 )
-                zipSec
+                (List.zip secMesesIdx secMeses2)
                 |> Any.fromList
                     convierteLlave
     in

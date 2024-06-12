@@ -7,7 +7,7 @@ import Chart.Item exposing (Any)
 import Datos
 import Dict.Any as Any
 import Expect exposing (Expectation)
-import Main
+import Main exposing (MesAnio)
 import Test exposing (..)
 
 
@@ -80,6 +80,15 @@ suite2 =
 
 suite4 : Test
 suite4 =
+    let
+        _ =
+            Debug.log "MesAnio Ene 2024: "
+                (Datos.datosParaTest1
+                    |> Main.reparteConsumo
+                    |> Tuple.first
+                    |> Any.get (Main.MesAnio Datos.Ene 2023)
+                )
+    in
     describe "Probando para ver que acomó bien los valores en los meses"
         [ test "Probando Ene+Feb 2022 con Datos.datosParaTest1"
             (\_ ->
