@@ -390,33 +390,16 @@ reparteConsumo cas0 =
 
         anyDictBase : AnyDict LlaveComparable MesAnio Int
         anyDictBase =
-            let
-                secMesesIdx : List Int
-                secMesesIdx =
-                    List.range
-                        (getMesNum cas0.mesMasAntiguo)
-                        (cas0.bimestresDeHistorial * 2 + 1 + getMesNum cas0.mesMasAntiguo)
-                        |> List.map
-                            (\x -> x - (((x - 1) // 12) * 12))
-
-                secMeses2 =
-                    List.range
-                        (getMesNum cas0.mesMasAntiguo)
-                        (cas0.bimestresDeHistorial * 2 + 1 + getMesNum cas0.mesMasAntiguo)
-                        |> List.map
-                            (\x -> (x - 1) // 12)
-            in
-            List.map
-                (\( idx, addAnio ) ->
-                    ( MesAnio
-                        (Array.get (idx - 1) mesesTy
-                            |> Maybe.withDefault Nov
-                        )
-                        (cas0.anioMasAntiguo + addAnio)
+            List.lift2
+                (\month year ->
+                    ( { mes = month
+                      , anio = year
+                      }
                     , 0
                     )
                 )
-                (List.zip secMesesIdx secMeses2)
+                (Array.toList mesesTy)
+                [ cas0.anioMasAntiguo, cas0.anioMasAntiguo + 1, cas0.anioMasAntiguo + 2 ]
                 |> Any.fromList
                     convierteLlave
     in
