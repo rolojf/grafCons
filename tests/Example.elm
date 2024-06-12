@@ -137,7 +137,45 @@ suite4 =
                     )
                     (Just (4 * 150.0 * 1 / 6 + 5 * 150 * 2 / 6))
             )
-        , test "Probando Mar+Abr 2022 con Datos.datosParaTest1"
+        , test "Probando func mesSig"
+            (\_ ->
+                Expect.equal
+                    (Main.mesSig
+                        Datos.Nov
+                    )
+                    Datos.Dic
+            )
+        , test "Probando func mesSig2"
+            (\_ ->
+                Expect.equal
+                    (Main.mesSig
+                        Datos.Dic
+                    )
+                    Datos.Ene
+            )
+        , test "MesAnio Mar 2022"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest1
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Mar 2022)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (150.0 / 2))
+            )
+        , test "MesAnio Abr 2022"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest1
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Abr 2022)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (150.0 / 6 + 2 * 150 * 2 / 6))
+            )
+        , test "Probando consumo Mar+Abr 2022 con Datos.datosParaTest1"
             (\_ ->
                 Expect.equal
                     (Datos.datosParaTest1
@@ -147,19 +185,41 @@ suite4 =
                         |> Maybe.withDefault regError
                         |> .dosAtras
                     )
-                    (150.0 * 4 / 6 + 2 * 150 / 6)
+                    ((150.0 / 2) + (150.0 / 6 + 2 * 150 * 2 / 6))
+            )
+        , test "MesAnio Nov 2023"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest1
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Nov 2023)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (11 * 150.0 / 2))
+            )
+        , test "MesAnio Dic 2023"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest1
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Dic 2023)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (11 * 150 / 6 + 12 * 150 * 2 / 6))
             )
         , test "Probando Nov+Dic 2023 con Datos.datosParaTest1"
             (\_ ->
                 Expect.equal
                     (Datos.datosParaTest1
                         |> Main.consumo
-                        |> List.drop 4
+                        |> List.drop 5
                         |> List.head
                         |> Maybe.withDefault regError
                         |> .unoAtras
                     )
-                    (11.0 * 150 * 4 / 6 + 12 * 150 * 1 / 6)
+                    ((11 * 150.0 / 2) + (11 * 150 / 6 + 12 * 150 * 2 / 6))
             )
         ]
 

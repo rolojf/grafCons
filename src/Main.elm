@@ -234,11 +234,6 @@ listaMesesTx =
     [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
 
 
-mesesToGraph : List Mes
-mesesToGraph =
-    [ Ene, Mar, May, Jul, Sep, Nov ]
-
-
 getMesNum : Mes -> Int
 getMesNum cualMes =
     Array.indexedMap
@@ -398,17 +393,14 @@ reparteConsumo cas0 =
     in
     ( List.foldl
         (\cadaElem elDic ->
-            elDic
-                |> actualizaLosMesesRepartiendo cadaElem
+            actualizaLosMesesRepartiendo cadaElem elDic
         )
         anyDictBase
-        (cas0 |> secBimCons)
-      -- |> Any.fromList convierteLlave)
+        (secBimCons cas0)
       --
       -- Tuple.second para testear
       --
-    , { anyDictBase = anyDictBase
-      }
+    , { anyDictBase = anyDictBase }
     )
 
 
@@ -456,25 +448,23 @@ consumo cas0 =
 
         obtnConsumoDelMesUltimoAnio : AnyDict LlaveComparable MesAnio Int -> Mes -> Int
         obtnConsumoDelMesUltimoAnio consRepartido mes =
-            case
-                Any.get
-                    (MesAnio mes (cas0.anioMasAntiguo + 2))
-                    consRepartido
-            of
-                Just consumoEse ->
-                    consumoEse
+            Any.get
+                (MesAnio mes (cas0.anioMasAntiguo + 2))
+                consRepartido
+                |> (\consumoObtenido ->
+                        case consumoObtenido of
+                            Just 0 ->
+                                Any.get
+                                    (MesAnio mes (cas0.anioMasAntiguo + 1))
+                                    consRepartido
+                                    |> Maybe.withDefault 99999
 
-                Nothing ->
-                    case
-                        Any.get
-                            (MesAnio mes (cas0.anioMasAntiguo + 1))
-                            consRepartido
-                    of
-                        Just consumoAhoraEste ->
-                            consumoAhoraEste
+                            Just cuantoCons ->
+                                cuantoCons
 
-                        Nothing ->
-                            999999
+                            Nothing ->
+                                99999
+                   )
     in
     List.map
         (\month ->
@@ -506,7 +496,7 @@ consumo cas0 =
                     0
             }
         )
-        mesesToGraph
+        [ Ene, Mar, May, Jul, Sep, Nov ]
 
 
 
