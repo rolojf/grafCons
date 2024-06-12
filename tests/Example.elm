@@ -83,13 +83,13 @@ suite2 =
 suite4 : Test
 suite4 =
     let
-        _ =
-            Debug.log "MesAnio Ene 2023: "
-                (Datos.datosParaTest1
-                    |> Main.reparteConsumo
-                    |> Tuple.first
-                    |> Any.get (Main.MesAnio Datos.Ene 2023)
-                )
+        regError =
+            { dosAtras = 1111.1
+            , unoAtras = 2222.2
+            , subsidio = 3333.3
+            , gen = 4444.4
+            , adicional = 5555.5
+            }
     in
     describe "Probando para ver que acomó bien los valores en los meses"
         [ test "Probando secBimCons"
@@ -104,100 +104,114 @@ suite4 =
                     )
                     ( { anio = 2023, mes = Datos.Ago }, 1500 )
             )
-        , test "Probando Ene+Feb 2022 con Datos.datosParaTest1"
+        , test "MesAnio Jul 2023"
             (\_ ->
-                Expect.lessThan 1
+                Expect.equal
                     (Datos.datosParaTest1
-                        |> Main.consumo
-                        |> List.head
-                        |> (\reg ->
-                                case reg of
-                                    Just registro ->
-                                        registro
-
-                                    Nothing ->
-                                        { dosAtras = 111.1
-                                        , unoAtras = 222.2
-                                        , subsidio = 333.3
-                                        , gen = 444.4
-                                        , adicional = 555.5
-                                        }
-                           )
-                        |> .dosAtras
-                        |> (-) (150.0 * 2 / 6)
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Jul 2023)
+                        |> Maybe.map toFloat
                     )
+                    (Just (9 * 150.0 * 3 / 6))
             )
-        , test "Probando Jul+Ago 2021 con Datos.datosParaTest1"
+        , test "MesAnio Ene 2023"
             (\_ ->
-                Expect.lessThan 1
+                Expect.equal
                     (Datos.datosParaTest1
-                        |> Main.consumo
-                        |> List.drop 2
-                        |> List.head
-                        |> (\reg ->
-                                case reg of
-                                    Just registro ->
-                                        registro
-
-                                    Nothing ->
-                                        { dosAtras = 111.1
-                                        , unoAtras = 222.2
-                                        , subsidio = 333.3
-                                        , gen = 444.4
-                                        , adicional = 555.5
-                                        }
-                           )
-                        |> .dosAtras
-                        |> (-) (3 * 150.0 * 4 / 6 + 4 * 150.0 * 2 / 6)
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Ene 2023)
+                        |> Maybe.map toFloat
                     )
+                    (Just (6 * 150.0 * 3 / 6))
             )
-        , test "Probando Ene+Feb 2023 con Datos.datosParaTest1"
+        , test "MesAnio Oct 2022"
             (\_ ->
-                Expect.lessThan 1
+                Expect.equal
                     (Datos.datosParaTest1
-                        |> Main.consumo
-                        |> List.head
-                        |> (\reg ->
-                                case reg of
-                                    Just registro ->
-                                        registro
-
-                                    Nothing ->
-                                        { dosAtras = 1111.1
-                                        , unoAtras = 2222.2
-                                        , subsidio = 3333.3
-                                        , gen = 4444.4
-                                        , adicional = 5555.5
-                                        }
-                           )
-                        |> .unoAtras
-                        |> Debug.log "Uno Atras Ene y Feb: "
-                        |> (-) (12.0 * 150 * 4 / 6 + 7 * 150 * 1 / 6)
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Oct 2022)
+                        |> Maybe.map toFloat
                     )
+                    (Just (4 * 150.0 * 1 / 6 + 5 * 150 * 2 / 6))
             )
-        , test "Probando Mar+Abr 2023 con Datos.datosParaTest1"
+        , test "Probando Mar+Abr 2022 con Datos.datosParaTest1"
             (\_ ->
-                Expect.lessThan 1
+                Expect.equal
                     (Datos.datosParaTest1
                         |> Main.consumo
                         |> List.drop 1
                         |> List.head
-                        |> (\reg ->
-                                case reg of
-                                    Just registro ->
-                                        registro
-
-                                    Nothing ->
-                                        { dosAtras = 1111.1
-                                        , unoAtras = 2222.2
-                                        , subsidio = 3333.3
-                                        , gen = 4444.4
-                                        , adicional = 5555.5
-                                        }
-                           )
-                        |> .unoAtras
-                        |> Debug.log "Uno Atras Mar y Abr: "
-                        |> (-) (7.0 * 150 * 4 / 6 + 8 * 150 * 2 / 6)
+                        |> Maybe.withDefault regError
+                        |> .dosAtras
                     )
+                    (150.0 * 4 / 6 + 2 * 150 / 6)
+            )
+        , test "Probando Nov+Dic 2023 con Datos.datosParaTest1"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest1
+                        |> Main.consumo
+                        |> List.drop 4
+                        |> List.head
+                        |> Maybe.withDefault regError
+                        |> .unoAtras
+                    )
+                    (11.0 * 150 * 4 / 6 + 12 * 150 * 1 / 6)
             )
         ]
+
+
+
+{- , test "Probando Jul+Ago 2021 con Datos.datosParaTest1"
+      (\_ ->
+          Expect.lessThan 1
+              (Datos.datosParaTest1
+                  |> Main.consumo
+                  |> List.drop 2
+                  |> List.head
+                  |> (\reg ->
+                          case reg of
+                              Just registro ->
+                                  registro
+
+                              Nothing ->
+                                  { dosAtras = 111.1
+                                  , unoAtras = 222.2
+                                  , subsidio = 333.3
+                                  , gen = 444.4
+                                  , adicional = 555.5
+                                  }
+                     )
+                  |> .dosAtras
+                  |> (-) (3 * 150.0 * 4 / 6 + 4 * 150.0 * 2 / 6)
+              )
+      )
+   , test "Probando Mar+Abr 2023 con Datos.datosParaTest1"
+      (\_ ->
+          Expect.lessThan 1
+              (Datos.datosParaTest1
+                  |> Main.consumo
+                  |> List.drop 1
+                  |> List.head
+                  |> (\reg ->
+                          case reg of
+                              Just registro ->
+                                  registro
+
+                              Nothing ->
+                                  { dosAtras = 1111.1
+                                  , unoAtras = 2222.2
+                                  , subsidio = 3333.3
+                                  , gen = 4444.4
+                                  , adicional = 5555.5
+                                  }
+                     )
+                  |> .unoAtras
+                  |> Debug.log "Uno Atras Mar y Abr: "
+                  |> (-) (7.0 * 150 * 4 / 6 + 8 * 150 * 2 / 6)
+              )
+      )
+-}
