@@ -426,25 +426,23 @@ consumo cas0 =
     let
         obtnConsumoDelMesPenultimoAnio : AnyDict LlaveComparable MesAnio Int -> Mes -> Int
         obtnConsumoDelMesPenultimoAnio consRepartido mes =
-            case
-                Any.get
-                    (MesAnio mes cas0.anioMasAntiguo)
-                    consRepartido
-            of
-                Just consumoEse ->
-                    consumoEse
+            Any.get
+                (MesAnio mes cas0.anioMasAntiguo)
+                consRepartido
+                |> (\consumoObtenido ->
+                        case consumoObtenido of
+                            Just 0 ->
+                                Any.get
+                                    (MesAnio mes (cas0.anioMasAntiguo + 1))
+                                    consRepartido
+                                    |> Maybe.withDefault 99999
 
-                Nothing ->
-                    case
-                        Any.get
-                            (MesAnio mes (cas0.anioMasAntiguo + 1))
-                            consRepartido
-                    of
-                        Just consumoAhoraEste ->
-                            consumoAhoraEste
+                            Just cuantoCons ->
+                                cuantoCons
 
-                        Nothing ->
-                            999999
+                            Nothing ->
+                                99999
+                   )
 
         obtnConsumoDelMesUltimoAnio : AnyDict LlaveComparable MesAnio Int -> Mes -> Int
         obtnConsumoDelMesUltimoAnio consRepartido mes =
