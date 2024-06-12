@@ -317,10 +317,14 @@ listadoDeMeses =
         |> List.concat
 
 
-secBimCons : DatosP -> List Int -> Array ( MesAnio, Int )
-secBimCons caso cconsumo =
+
+-- * Repartición del Consumo
+
+
+secBimCons : DatosP -> List ( MesAnio, Int )
+secBimCons caso =
     let
-        secBimestres : Array MesAnio
+        secBimestres : List MesAnio
         secBimestres =
             List.foldl
                 (\_ acVeces ->
@@ -334,39 +338,24 @@ secBimCons caso cconsumo =
                 [ MesAnio caso.mesMasAntiguo caso.anioMasAntiguo ]
                 (List.repeat caso.bimestresDeHistorial 1)
                 |> List.reverse
-                |> Array.fromList
-
-        consumoArray =
-            Array.fromList cconsumo
     in
-    Array.map2
+    List.map2
         (\bim cons -> ( bim, cons ))
         secBimestres
-        consumoArray
-
-
-
--- * Repartición del Consumo
+        (caso.consumoTodos |> List.reverse)
 
 
 reparteConsumo :
     DatosP
     ->
         ( AnyDict LlaveComparable MesAnio Int
-        , { consumoPaAtras : List Int
-
-          -- : AnyDict LlaveComparable MesAnio Int
-          , anyDictBase : AnyDict LlaveComparable MesAnio Int
+        , { anyDictBase : AnyDict LlaveComparable MesAnio Int
           }
         )
 reparteConsumo cas0 =
     let
-        consumoPaAtras : List Int
-        consumoPaAtras =
-            List.reverse cas0.consumoTodos
-
-        reparteAMeses : Int -> MesAnio -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
-        reparteAMeses consumoDelBim mesInicDelBim elDict =
+        actualizaLosMesesRepartiendo : ( MesAnio, Int ) -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
+        actualizaLosMesesRepartiendo ( mesAnioInicioDeCadaBimestre, consumoDelBim ) elDict =
             let
                 uno =
                     round <| (1 - cas0.parcial) * 30.0 * (toFloat consumoDelBim / 60.0)
@@ -379,13 +368,13 @@ reparteConsumo cas0 =
             in
             elDict
                 |> Any.update
-                    mesInicDelBim
+                    mesAnioInicioDeCadaBimestre
                     (Maybe.map ((+) uno))
                 |> Any.update
-                    (mesAnioSig mesInicDelBim)
+                    (mesAnioSig mesAnioInicioDeCadaBimestre)
                     (Maybe.map ((+) dos))
                 |> Any.update
-                    (mesAnioSig (mesAnioSig mesInicDelBim))
+                    (mesAnioSig (mesAnioSig mesAnioInicioDeCadaBimestre))
                     (Maybe.map ((+) tres))
 
         anyDictBase : AnyDict LlaveComparable MesAnio Int
@@ -403,24 +392,18 @@ reparteConsumo cas0 =
                 |> Any.fromList
                     convierteLlave
     in
-    ( Array.foldl
+    ( List.foldl
         (\cadaElem elDic ->
             elDic
-                |> reparteAMeses
-                    (Tuple.second cadaElem)
-                    (Tuple.first cadaElem)
+                |> actualizaLosMesesRepartiendo cadaElem
         )
         anyDictBase
-        (secBimCons cas0 consumoPaAtras)
-    , { consumoPaAtras = consumoPaAtras
-
-      {- , reparteAMeses =
-         reparteAMeses
-             cas0
-             (Tuple.first cadaElem)
-             (Tuple.second cadaElem)
-      -}
-      , anyDictBase = anyDictBase
+        (cas0 |> secBimCons)
+      -- |> Any.fromList convierteLlave)
+      --
+      -- Tuple.second para testear
+      --
+    , { anyDictBase = anyDictBase
       }
     )
 
