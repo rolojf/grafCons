@@ -4,7 +4,7 @@ module Example exposing (todos)
 
 import Array
 import Chart.Item exposing (Any)
-import Datos
+import Datos exposing (Mes(..), datosParaTest2)
 import Dict.Any as Any
 import Expect exposing (Expectation)
 import Main exposing (MesAnio, secBimCons)
@@ -220,6 +220,74 @@ suite4 =
                         |> .unoAtras
                     )
                     ((11 * 150.0 / 2) + (11 * 150 / 6 + 12 * 150 * 2 / 6))
+            )
+        , test "MesAnio Mar 2022 datosParaTest2"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest2
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Mar 2022)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (3 * 180.0 / 2))
+            )
+        , test "MesAnio Abr 2022 datosParaTest2"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest2
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Abr 2022)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (3 * 180.0 * 2 / 6 + 4 * 180 * 1 / 6))
+            )
+        , test "Probando consumo Mar+Abr 2022 con Datos.datosParaTest2"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest2
+                        |> Main.consumo
+                        |> List.drop 1
+                        |> List.head
+                        |> Maybe.withDefault regError
+                        |> .dosAtras
+                    )
+                    ((3 * 180.0 / 2) + (3 * 180.0 * 2 / 6 + 4 * 180 * 1 / 6))
+            )
+        , test "MesAnio Jul 2023 datosParaTest2"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest2
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Jul 2023)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (11 * 180.0 / 2))
+            )
+        , test "MesAnio Ago 2023 datosParaTest2"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest2
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Ago 2023)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (11 * 180 * 2 / 6 + 12 * 180 * 1 / 6))
+            )
+        , test "Probando Jul+Ago 2023 con Datos.datosParaTest2"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest2
+                        |> Main.consumo
+                        |> List.drop 3
+                        |> List.head
+                        |> Maybe.withDefault regError
+                        |> .unoAtras
+                    )
+                    ((11 * 180.0 / 2) + (11 * 180 * 2 / 6 + 12 * 180 * 1 / 6))
             )
         ]
 
