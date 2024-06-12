@@ -391,25 +391,44 @@ reparteConsumo cas0 =
                 |> Any.fromList
                     convierteLlave
 
-        obtnMesPerdido : AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
-        obtnMesPerdido laDict =
+        obtnMesPerdido : Datos.Mes -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
+        obtnMesPerdido mmes laDict =
             let
-                valorPasar =
+                valorPasar0 =
                     Any.get
-                        (MesAnio (mesAnt cas0.mesMasAntiguo) (cas0.anioMasAntiguo + 2))
+                        (MesAnio mmes cas0.anioMasAntiguo)
                         laDict
-            in
-            if List.any (\a -> cas0.mesMasAntiguo == a) [ Datos.Feb, Datos.Abr, Datos.Jun, Datos.Ago, Datos.Oct, Datos.Dic ] then
-                laDict
-                    |> Any.update
-                        (MesAnio (mesAnt cas0.mesMasAntiguo) cas0.anioMasAntiguo)
-                        (\_ -> valorPasar)
-                    |> Any.update
-                        (MesAnio (mesAnt cas0.mesMasAntiguo) (cas0.anioMasAntiguo + 2))
-                        (\_ -> Just 0)
 
-            else
-                laDict
+                valorPasar1 =
+                    Any.get
+                        (MesAnio mmes (cas0.anioMasAntiguo + 1))
+                        laDict
+
+                valorPasar2 =
+                    Any.get
+                        (MesAnio mmes (cas0.anioMasAntiguo + 2))
+                        laDict
+
+                valorPasar3 =
+                    Any.get
+                        (MesAnio mmes (cas0.anioMasAntiguo + 3))
+                        laDict
+
+                _ =
+                    Debug.log "Valores pasados" ( mmes, [ ( 0, valorPasar0 ), ( 1, valorPasar1 ), ( 2, valorPasar2 ), ( 3, valorPasar3 ) ] )
+            in
+            {- if List.any (\a -> cas0.mesMasAntiguo == a) [ Datos.Feb, Datos.Abr, Datos.Jun, Datos.Ago, Datos.Oct, Datos.Dic ] then
+                   laDict
+                       |> Any.update
+                           (MesAnio (mesAnt cas0.mesMasAntiguo) cas0.anioMasAntiguo)
+                           (\_ -> valorPasar0)
+                       |> Any.update
+                           (MesAnio (mesAnt cas0.mesMasAntiguo) (cas0.anioMasAntiguo + 2))
+                           (\_ -> Just 0)
+
+               else
+            -}
+            laDict
     in
     ( List.foldl
         (\cadaElem elDic ->
@@ -417,7 +436,7 @@ reparteConsumo cas0 =
         )
         anyDictBase
         (secBimCons cas0)
-        |> obtnMesPerdido
+      -- |> obtnMesPerdido Datos.Ago
       --
       -- Tuple.second para testear
       --

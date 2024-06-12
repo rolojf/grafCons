@@ -85,7 +85,7 @@ datos : DatosP
 datos =
     { paneles = 7
     , capPanelesWatts = 550
-    , consumoTodos = [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ]
+    , consumoTodos = List.reverse [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ]
     , bimestresDeHistorial = 12
     , hayAdic = False
     , climasAdic = []
