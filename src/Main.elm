@@ -324,25 +324,29 @@ listadoDeMeses =
 secBimCons : DatosP -> List ( MesAnio, Int )
 secBimCons caso =
     let
+        aumentaVecesElMesAnio : Int -> MesAnio -> MesAnio
+        aumentaVecesElMesAnio veces mesAnio =
+            if veces == 0 then
+                mesAnio
+
+            else
+                aumentaVecesElMesAnio
+                    (veces - 1)
+                    (mesAnioSig (mesAnioSig mesAnio))
+
         secBimestres : List MesAnio
         secBimestres =
-            List.foldl
-                (\_ acVeces ->
-                    case List.head acVeces of
-                        Nothing ->
-                            MesAnio Nov 9999 :: acVeces
-
-                        Just ma ->
-                            (mesAnioSig ma |> mesAnioSig) :: acVeces
+            List.indexedMap
+                (\indice mesAnio -> aumentaVecesElMesAnio indice mesAnio)
+                (List.repeat
+                    caso.bimestresDeHistorial
+                    (MesAnio caso.mesMasAntiguo caso.anioMasAntiguo)
                 )
-                [ MesAnio caso.mesMasAntiguo caso.anioMasAntiguo ]
-                (List.repeat caso.bimestresDeHistorial 1)
-                |> List.reverse
     in
     List.map2
         (\bim cons -> ( bim, cons ))
         secBimestres
-        (caso.consumoTodos |> List.reverse)
+        caso.consumoTodos
 
 
 reparteConsumo :

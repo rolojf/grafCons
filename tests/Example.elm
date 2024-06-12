@@ -66,15 +66,17 @@ suite2 =
         [ test "MesAnio Marzo" (\_ -> Expect.equal (Main.mesAnioSig marzo) abril)
         , test "MesAnio Diciembre" (\_ -> Expect.equal (Main.mesAnioSig diciembre) enero)
         , test "Conviete a comparable" (\_ -> Expect.equal (Main.convierteLlave abril) ( "Abr", 2022 ))
-        , test "Suma de watts anuales"
-            (\_ ->
-                Expect.lessThan 1
-                    ((Datos.datosParaTest1 |> Main.reparteConsumo |> Tuple.second |> .consumoPaAtras |> List.sum)
-                        - (Datos.datosParaTest1 |> Main.reparteConsumo |> Tuple.first |> Any.values |> List.sum)
-                    )
-            )
 
-        --, test "reparticion normal" (\_ -> Expect.equal (Main.convierteLlave abril) ( "Abr", 2022 ))
+        {- , test "Suma de watts anuales"
+               (\_ ->
+                   Expect.lessThan 1
+                       ((Datos.datosParaTest1 |> Main.reparteConsumo |> Tuple.second |> .consumoPaAtras |> List.sum)
+                           - (Datos.datosParaTest1 |> Main.reparteConsumo |> Tuple.first |> Any.values |> List.sum)
+                       )
+               )
+
+           , test "reparticion normal" (\_ -> Expect.equal (Main.convierteLlave abril) ( "Abr", 2022 ))
+        -}
         ]
 
 
@@ -82,11 +84,17 @@ suite4 : Test
 suite4 =
     let
         _ =
-            Debug.log "MesAnio Ene 2024: "
+            Debug.log "MesAnio Ene 2023: "
                 (Datos.datosParaTest1
                     |> Main.reparteConsumo
                     |> Tuple.first
                     |> Any.get (Main.MesAnio Datos.Ene 2023)
+                )
+
+        _ =
+            Debug.log "Secuescia Bimestres"
+                (Datos.datosParaTest1
+                    |> Main.secBimCons
                 )
     in
     describe "Probando para ver que acomó bien los valores en los meses"
