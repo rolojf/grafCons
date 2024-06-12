@@ -37,7 +37,7 @@ type alias Clima =
 
 
 type alias DatosP =
-    { paneles : Float
+    { paneles : Int
     , capPanelesWatts : Int
     , consumoTodos : List Int
     , bimestresDeHistorial : Int
@@ -47,20 +47,6 @@ type alias DatosP =
     , anioMasAntiguo : Int
     , nombre : String
     , parcial : Float
-    }
-
-
-datos =
-    { paneles = 7
-    , capPanelesWatts = 550
-    , consumoTodos = [ 1632, 757, 1075, 1017, 2020, 1883, 703, 456, 790, 634, 1715, 1149 ]
-    , bimestresDeHistorial = 12
-    , hayAdic = False
-    , climasAdic = []
-    , mesMasAntiguo = May
-    , anioMasAntiguo = 2022
-    , nombre = "Gilberto Ref. Doc. Romero"
-    , parcial = 24 / 30
     }
 
 
@@ -95,19 +81,34 @@ datosParaTest2 =
     }
 
 
+datos : DatosP
+datos =
+    { paneles = 7
+    , capPanelesWatts = 550
+    , consumoTodos = [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ]
+    , bimestresDeHistorial = 12
+    , hayAdic = False
+    , climasAdic = []
+    , mesMasAntiguo = Ago
+    , anioMasAntiguo = 2021
+    , nombre = "Mamá de Yuri"
+    , parcial = 13 / 30
+    }
 
-{- datosPapaYuri =
-       { paneles = 7
-       , capPanelesWatts = 550
-       , consumoTodos = [ 2121, 958, 590, 793, 701, 1271, 1596, 1283, 532, 582, 576, 1127 ]
-       , bimestresDeHistorial = 12
-       , hayAdic = False
-       , climasAdic = []
-       , mesMasAntiguo = Ago
-       , anioMasAntiguo = 2021
-       , nombre = "Mamá de Yuri"
-       , parcial = 13 / 30
-       }
+
+
+{- datosGilDocRomero =
+    { paneles = 7
+    , capPanelesWatts = 550
+    , consumoTodos = [ 1632, 757, 1075, 1017, 2020, 1883, 703, 456, 790, 634, 1715, 1149 ]
+    , bimestresDeHistorial = 12
+    , hayAdic = False
+    , climasAdic = []
+    , mesMasAntiguo = May
+    , anioMasAntiguo = 2022
+    , nombre = "Gilberto Ref. Doc. Romero"
+    , parcial = 24 / 30
+    }
 
 
 

@@ -52,7 +52,7 @@ main =
             ]
             [ text
                 ("Su Consumo vs Generación de Panel "
-                    ++ format usLocale (datos.capPanelesWatts * datos.paneles / 1000)
+                    ++ format usLocale (toFloat (datos.capPanelesWatts * datos.paneles) / 1000)
                     ++ " kWp"
                 )
             ]
@@ -67,9 +67,9 @@ main =
                 ]
             ]
             [ text
-                (format usLocale (datos.capPanelesWatts * datos.paneles / 1000)
+                (format usLocale (toFloat (datos.capPanelesWatts * datos.paneles) / 1000)
                     ++ " kWp porque son "
-                    ++ String.fromFloat datos.paneles
+                    ++ String.fromInt datos.paneles
                     ++ " paneles por "
                     ++ String.fromInt datos.capPanelesWatts
                     ++ " watts cada uno / 1,000 "
@@ -458,7 +458,7 @@ obtnSub mmes =
 
 obtenGenera : DatosP -> Int -> Int -> Float
 obtenGenera caso m1 m2 =
-    (caso.paneles * toFloat caso.capPanelesWatts / (4 * 595))
+    (toFloat caso.paneles * toFloat caso.capPanelesWatts / (4 * 595))
         * ((Array.get (m1 - 1) genera |> Maybe.withDefault 0)
             + (Array.get (m2 - 1) genera |> Maybe.withDefault 0)
           )
@@ -629,7 +629,7 @@ grafica =
             , C.bar (\reg -> reg.gen) [ CA.color CA.green ]
                 |> C.named
                     ("Generada x Panel "
-                        ++ format usLocale (datos.capPanelesWatts * datos.paneles / 1000)
+                        ++ format usLocale (toFloat (datos.capPanelesWatts * datos.paneles) / 1000)
                         ++ " kWp"
                     )
             ]
