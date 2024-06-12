@@ -234,10 +234,9 @@ listaMesesTx =
     [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
 
 
-mesesToGraph : Array Mes
+mesesToGraph : List Mes
 mesesToGraph =
-    Array.fromList
-        [ Ene, Mar, May, Jul, Sep, Nov ]
+    [ Ene, Mar, May, Jul, Sep, Nov ]
 
 
 getMesNum : Mes -> Int
@@ -362,15 +361,15 @@ reparteConsumo :
         )
 reparteConsumo cas0 =
     let
-        consumoPaAtras : DatosP -> List Int
-        consumoPaAtras caso =
-            List.reverse caso.consumoTodos
+        consumoPaAtras : List Int
+        consumoPaAtras =
+            List.reverse cas0.consumoTodos
 
-        reparteAMeses : DatosP -> Int -> MesAnio -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
-        reparteAMeses caso consumoDelBim mesInicDelBim elDict =
+        reparteAMeses : Int -> MesAnio -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
+        reparteAMeses consumoDelBim mesInicDelBim elDict =
             let
                 uno =
-                    round <| (1 - caso.parcial) * 30.0 * toFloat consumoDelBim / 61
+                    round <| (1 - cas0.parcial) * 30.0 * toFloat consumoDelBim / 61
 
                 dos =
                     round <| 31.0 * toFloat consumoDelBim / 61
@@ -389,21 +388,21 @@ reparteConsumo cas0 =
                     (mesAnioSig (mesAnioSig mesInicDelBim))
                     (Maybe.map ((+) tres))
 
-        anyDictBase : DatosP -> AnyDict LlaveComparable MesAnio Int
-        anyDictBase caso =
+        anyDictBase : AnyDict LlaveComparable MesAnio Int
+        anyDictBase =
             let
                 secMesesIdx : List Int
                 secMesesIdx =
                     List.range
-                        (getMesNum caso.mesMasAntiguo)
-                        (caso.bimestresDeHistorial * 2 + 1 + getMesNum caso.mesMasAntiguo)
+                        (getMesNum cas0.mesMasAntiguo)
+                        (cas0.bimestresDeHistorial * 2 + 1 + getMesNum cas0.mesMasAntiguo)
                         |> List.map
                             (\x -> x - (((x - 1) // 12) * 12))
 
                 secMeses2 =
                     List.range
-                        (getMesNum caso.mesMasAntiguo)
-                        (caso.bimestresDeHistorial * 2 + 1 + getMesNum caso.mesMasAntiguo)
+                        (getMesNum cas0.mesMasAntiguo)
+                        (cas0.bimestresDeHistorial * 2 + 1 + getMesNum cas0.mesMasAntiguo)
                         |> List.map
                             (\x -> (x - 1) // 12)
 
@@ -416,7 +415,7 @@ reparteConsumo cas0 =
                         (Array.get (idx - 1) mesesTy
                             |> Maybe.withDefault Nov
                         )
-                        (caso.anioMasAntiguo + addAnio)
+                        (cas0.anioMasAntiguo + addAnio)
                     , 0
                     )
                 )
@@ -428,13 +427,12 @@ reparteConsumo cas0 =
         (\cadaElem elDic ->
             elDic
                 |> reparteAMeses
-                    cas0
                     (Tuple.second cadaElem)
                     (Tuple.first cadaElem)
         )
-        (anyDictBase cas0)
-        (secBimCons cas0 (consumoPaAtras cas0))
-    , { consumoPaAtras = consumoPaAtras cas0
+        anyDictBase
+        (secBimCons cas0 consumoPaAtras)
+    , { consumoPaAtras = consumoPaAtras
 
       {- , reparteAMeses =
          reparteAMeses
@@ -442,7 +440,7 @@ reparteConsumo cas0 =
              (Tuple.first cadaElem)
              (Tuple.second cadaElem)
       -}
-      , anyDictBase = anyDictBase cas0
+      , anyDictBase = anyDictBase
       }
     )
 
@@ -467,11 +465,11 @@ obtenGenera caso m1 m2 =
 consumo : DatosP -> List { dosAtras : Float, unoAtras : Float, subsidio : Float, gen : Float, adicional : Float }
 consumo cas0 =
     let
-        obtnConsumoDelMesPenultimoAnio : DatosP -> AnyDict LlaveComparable MesAnio Int -> Mes -> Int
-        obtnConsumoDelMesPenultimoAnio caso consRepartido mes =
+        obtnConsumoDelMesPenultimoAnio : AnyDict LlaveComparable MesAnio Int -> Mes -> Int
+        obtnConsumoDelMesPenultimoAnio consRepartido mes =
             case
                 Any.get
-                    (MesAnio mes caso.anioMasAntiguo)
+                    (MesAnio mes cas0.anioMasAntiguo)
                     consRepartido
             of
                 Just consumoEse ->
@@ -480,7 +478,7 @@ consumo cas0 =
                 Nothing ->
                     case
                         Any.get
-                            (MesAnio mes (caso.anioMasAntiguo + 1))
+                            (MesAnio mes (cas0.anioMasAntiguo + 1))
                             consRepartido
                     of
                         Just consumoAhoraEste ->
@@ -489,11 +487,11 @@ consumo cas0 =
                         Nothing ->
                             999999
 
-        obtnConsumoDelMesUltimoAnio : DatosP -> AnyDict LlaveComparable MesAnio Int -> Mes -> Int
-        obtnConsumoDelMesUltimoAnio caso consRepartido mes =
+        obtnConsumoDelMesUltimoAnio : AnyDict LlaveComparable MesAnio Int -> Mes -> Int
+        obtnConsumoDelMesUltimoAnio consRepartido mes =
             case
                 Any.get
-                    (MesAnio mes (caso.anioMasAntiguo + 2))
+                    (MesAnio mes (cas0.anioMasAntiguo + 2))
                     consRepartido
             of
                 Just consumoEse ->
@@ -502,7 +500,7 @@ consumo cas0 =
                 Nothing ->
                     case
                         Any.get
-                            (MesAnio mes (caso.anioMasAntiguo + 1))
+                            (MesAnio mes (cas0.anioMasAntiguo + 1))
                             consRepartido
                     of
                         Just consumoAhoraEste ->
@@ -511,15 +509,15 @@ consumo cas0 =
                         Nothing ->
                             999999
     in
-    Array.map
+    List.map
         (\month ->
             { dosAtras =
-                obtnConsumoDelMesPenultimoAnio cas0 (Tuple.first (reparteConsumo cas0)) month
-                    + obtnConsumoDelMesPenultimoAnio cas0 (Tuple.first (reparteConsumo cas0)) (mesSig month)
+                obtnConsumoDelMesPenultimoAnio (Tuple.first (reparteConsumo cas0)) month
+                    + obtnConsumoDelMesPenultimoAnio (Tuple.first (reparteConsumo cas0)) (mesSig month)
                     |> toFloat
             , unoAtras =
-                obtnConsumoDelMesUltimoAnio cas0 (Tuple.first (reparteConsumo cas0)) month
-                    + obtnConsumoDelMesUltimoAnio cas0 (Tuple.first (reparteConsumo cas0)) (mesSig month)
+                obtnConsumoDelMesUltimoAnio (Tuple.first (reparteConsumo cas0)) month
+                    + obtnConsumoDelMesUltimoAnio (Tuple.first (reparteConsumo cas0)) (mesSig month)
                     |> toFloat
             , subsidio =
                 obtnSub month + obtnSub (mesSig month)
@@ -542,7 +540,6 @@ consumo cas0 =
             }
         )
         mesesToGraph
-        |> Array.toList
 
 
 

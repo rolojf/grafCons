@@ -67,12 +67,12 @@ datos =
 datosParaTest1 =
     { paneles = 8
     , capPanelesWatts = 550
-    , consumoTodos = List.repeat 12 1200
+    , consumoTodos = List.range 1 12 |> List.map (\hm -> hm * 150)
     , bimestresDeHistorial = 12
     , hayAdic = False
     , climasAdic = []
-    , mesMasAntiguo = Nov
-    , anioMasAntiguo = 2021
+    , mesMasAntiguo = Feb
+    , anioMasAntiguo = 2022
     , nombre = "Test 1"
     , parcial = 10 / 30
     }

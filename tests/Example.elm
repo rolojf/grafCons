@@ -2,6 +2,7 @@ module Example exposing (todos)
 
 -- import Fuzz exposing (Fuzzer, int, list, string)
 
+import Array
 import Chart.Item exposing (Any)
 import Datos
 import Dict.Any as Any
@@ -15,6 +16,7 @@ todos =
         [ suite1
         , suite2
         , suite3
+        , suite4
         ]
 
 
@@ -73,4 +75,106 @@ suite2 =
             )
 
         --, test "reparticion normal" (\_ -> Expect.equal (Main.convierteLlave abril) ( "Abr", 2022 ))
+        ]
+
+
+suite4 : Test
+suite4 =
+    describe "Probando para ver que acomó bien los valores en los meses"
+        [ test "Probando Ene+Feb 2022 con Datos.datosParaTest1"
+            (\_ ->
+                Expect.lessThan 1
+                    (Datos.datosParaTest1
+                        |> Main.consumo
+                        |> List.head
+                        |> (\reg ->
+                                case reg of
+                                    Just registro ->
+                                        registro
+
+                                    Nothing ->
+                                        { dosAtras = 111.1
+                                        , unoAtras = 222.2
+                                        , subsidio = 333.3
+                                        , gen = 444.4
+                                        , adicional = 555.5
+                                        }
+                           )
+                        |> .dosAtras
+                        |> (-) (150.0 * 2 / 6)
+                    )
+            )
+        , test "Probando Jul+Ago 2021 con Datos.datosParaTest1"
+            (\_ ->
+                Expect.lessThan 1
+                    (Datos.datosParaTest1
+                        |> Main.consumo
+                        |> List.drop 2
+                        |> List.head
+                        |> (\reg ->
+                                case reg of
+                                    Just registro ->
+                                        registro
+
+                                    Nothing ->
+                                        { dosAtras = 111.1
+                                        , unoAtras = 222.2
+                                        , subsidio = 333.3
+                                        , gen = 444.4
+                                        , adicional = 555.5
+                                        }
+                           )
+                        |> .dosAtras
+                        |> (-) (3 * 150.0 * 4 / 6 + 4 * 150.0 * 2 / 6)
+                    )
+            )
+        , test "Probando Ene+Feb 2023 con Datos.datosParaTest1"
+            (\_ ->
+                Expect.lessThan 1
+                    (Datos.datosParaTest1
+                        |> Main.consumo
+                        |> List.head
+                        |> (\reg ->
+                                case reg of
+                                    Just registro ->
+                                        registro
+
+                                    Nothing ->
+                                        { dosAtras = 1111.1
+                                        , unoAtras = 2222.2
+                                        , subsidio = 3333.3
+                                        , gen = 4444.4
+                                        , adicional = 5555.5
+                                        }
+                           )
+                        |> .unoAtras
+                        |> Debug.log "Uno Atras Ene y Feb: "
+                        |> (-) (12.0 * 150 * 4 / 6 + 7 * 150 * 1 / 6)
+                    )
+            )
+        , test "Probando Mar+Abr 2023 con Datos.datosParaTest1"
+            (\_ ->
+                Expect.lessThan 1
+                    (Datos.datosParaTest1
+                        |> Main.consumo
+                        |> List.drop 1
+                        |> List.head
+                        |> (\reg ->
+                                case reg of
+                                    Just registro ->
+                                        registro
+
+                                    Nothing ->
+                                        { dosAtras = 1111.1
+                                        , unoAtras = 2222.2
+                                        , subsidio = 3333.3
+                                        , gen = 4444.4
+                                        , adicional = 5555.5
+                                        }
+                           )
+                        |> .unoAtras
+                        |> Debug.log "Uno Atras Mar y Abr: "
+                        |> (-) (7.0 * 150 * 4 / 6 + 8 * 150 * 2 / 6)
+                    )
+            )
         ]
