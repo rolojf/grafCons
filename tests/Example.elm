@@ -7,7 +7,7 @@ import Chart.Item exposing (Any)
 import Datos
 import Dict.Any as Any
 import Expect exposing (Expectation)
-import Main exposing (MesAnio)
+import Main exposing (MesAnio, secBimCons)
 import Test exposing (..)
 
 
@@ -90,15 +90,21 @@ suite4 =
                     |> Tuple.first
                     |> Any.get (Main.MesAnio Datos.Ene 2023)
                 )
-
-        _ =
-            Debug.log "Secuescia Bimestres"
-                (Datos.datosParaTest1
-                    |> Main.secBimCons
-                )
     in
     describe "Probando para ver que acomó bien los valores en los meses"
-        [ test "Probando Ene+Feb 2022 con Datos.datosParaTest1"
+        [ test "Probando secBimCons"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest1
+                        |> Main.secBimCons
+                        |> List.drop 9
+                        |> List.head
+                        |> Maybe.withDefault
+                            ( { anio = 9999, mes = Datos.Ago }, 9999 )
+                    )
+                    ( { anio = 2023, mes = Datos.Ago }, 1500 )
+            )
+        , test "Probando Ene+Feb 2022 con Datos.datosParaTest1"
             (\_ ->
                 Expect.lessThan 1
                     (Datos.datosParaTest1
