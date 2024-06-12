@@ -53,29 +53,29 @@ type alias DatosP =
 datosParaTest1 =
     { paneles = 8
     , capPanelesWatts = 550
-    , consumoTodos = List.repeat 12 1200
+    , consumoTodos = List.range 1 12 |> List.map (\hm -> hm * 150)
     , bimestresDeHistorial = 12
     , hayAdic = False
     , climasAdic = []
-    , mesMasAntiguo = Nov
-    , anioMasAntiguo = 2021
+    , mesMasAntiguo = Feb
+    , anioMasAntiguo = 2022
     , nombre = "Test 1"
     , parcial = 10 / 30
     }
 
 
 datosParaTest2 =
-    { paneles = 8
+    { paneles = 12
     , capPanelesWatts = 550
-    , consumoTodos = List.repeat 12 900
+    , consumoTodos = List.range 1 12 |> List.map (\hm -> hm * 180)
     , bimestresDeHistorial = 12
     , hayAdic = True
     , climasAdic =
         [ { tons = 1.5, horasEnArranque = 2, tipoClima = Normal, area = "Área Social", frecUso = Semanal 7.0 2 }
         , { tons = 1.0, horasEnArranque = 2, tipoClima = Inverter, area = "Recamara de los niños", frecUso = Diario 9.0 }
         ]
-    , mesMasAntiguo = Feb
-    , anioMasAntiguo = 2022
+    , mesMasAntiguo = Oct
+    , anioMasAntiguo = 2021
     , nombre = "Test 2"
     , parcial = 20 / 30
     }

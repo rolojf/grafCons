@@ -234,12 +234,6 @@ listaMesesTx =
     [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ]
 
 
-mesesToGraph : Array Mes
-mesesToGraph =
-    Array.fromList
-        [ Ene, Mar, May, Jul, Sep, Nov ]
-
-
 getMesNum : Mes -> Int
 getMesNum cualMes =
     Array.indexedMap
@@ -318,132 +312,116 @@ listadoDeMeses =
         |> List.concat
 
 
-secBimCons : DatosP -> List Int -> Array ( MesAnio, Int )
-secBimCons caso cconsumo =
-    let
-        secBimestres : Array MesAnio
-        secBimestres =
-            List.foldl
-                (\_ acVeces ->
-                    case List.head acVeces of
-                        Nothing ->
-                            MesAnio Nov 9999 :: acVeces
-
-                        Just ma ->
-                            (mesAnioSig ma |> mesAnioSig) :: acVeces
-                )
-                [ MesAnio caso.mesMasAntiguo caso.anioMasAntiguo ]
-                (List.repeat caso.bimestresDeHistorial 1)
-                |> List.reverse
-                |> Array.fromList
-
-        consumoArray =
-            Array.fromList cconsumo
-    in
-    Array.map2
-        (\bim cons -> ( bim, cons ))
-        secBimestres
-        consumoArray
-
-
 
 -- * Repartición del Consumo
+
+
+secBimCons : DatosP -> List ( MesAnio, Int )
+secBimCons caso =
+    let
+        aumentaVecesElMesAnio : Int -> MesAnio -> MesAnio
+        aumentaVecesElMesAnio veces mesAnio =
+            if veces == 0 then
+                mesAnio
+
+            else
+                aumentaVecesElMesAnio
+                    (veces - 1)
+                    (mesAnioSig (mesAnioSig mesAnio))
+
+        secBimestres : List MesAnio
+        secBimestres =
+            List.indexedMap
+                (\indice mesAnio -> aumentaVecesElMesAnio indice mesAnio)
+                (List.repeat
+                    caso.bimestresDeHistorial
+                    (MesAnio caso.mesMasAntiguo caso.anioMasAntiguo)
+                )
+    in
+    List.map2
+        (\bim cons -> ( bim, cons ))
+        secBimestres
+        caso.consumoTodos
 
 
 reparteConsumo :
     DatosP
     ->
         ( AnyDict LlaveComparable MesAnio Int
-        , { consumoPaAtras : List Int
-
-          -- : AnyDict LlaveComparable MesAnio Int
-          , anyDictBase : AnyDict LlaveComparable MesAnio Int
+        , { anyDictBase : AnyDict LlaveComparable MesAnio Int
           }
         )
 reparteConsumo cas0 =
     let
-        consumoPaAtras : DatosP -> List Int
-        consumoPaAtras caso =
-            List.reverse caso.consumoTodos
-
-        reparteAMeses : DatosP -> Int -> MesAnio -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
-        reparteAMeses caso consumoDelBim mesInicDelBim elDict =
+        actualizaLosMesesRepartiendo : ( MesAnio, Int ) -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
+        actualizaLosMesesRepartiendo ( mesAnioInicioDeCadaBimestre, consumoDelBim ) elDict =
             let
                 uno =
-                    round <| (1 - caso.parcial) * 30.0 * toFloat consumoDelBim / 61
+                    round <| (1 - cas0.parcial) * 30.0 * (toFloat consumoDelBim / 60.0)
 
                 dos =
-                    round <| 31.0 * toFloat consumoDelBim / 61
+                    round <| 30.0 * (toFloat consumoDelBim / 60.0)
 
                 tres =
                     consumoDelBim - uno - dos
             in
             elDict
                 |> Any.update
-                    mesInicDelBim
+                    mesAnioInicioDeCadaBimestre
                     (Maybe.map ((+) uno))
                 |> Any.update
-                    (mesAnioSig mesInicDelBim)
+                    (mesAnioSig mesAnioInicioDeCadaBimestre)
                     (Maybe.map ((+) dos))
                 |> Any.update
-                    (mesAnioSig (mesAnioSig mesInicDelBim))
+                    (mesAnioSig (mesAnioSig mesAnioInicioDeCadaBimestre))
                     (Maybe.map ((+) tres))
 
-        anyDictBase : DatosP -> AnyDict LlaveComparable MesAnio Int
-        anyDictBase caso =
-            let
-                secMesesIdx : List Int
-                secMesesIdx =
-                    List.range
-                        (getMesNum caso.mesMasAntiguo)
-                        (caso.bimestresDeHistorial * 2 + 1 + getMesNum caso.mesMasAntiguo)
-                        |> List.map
-                            (\x -> x - (((x - 1) // 12) * 12))
-
-                secMeses2 =
-                    List.range
-                        (getMesNum caso.mesMasAntiguo)
-                        (caso.bimestresDeHistorial * 2 + 1 + getMesNum caso.mesMasAntiguo)
-                        |> List.map
-                            (\x -> (x - 1) // 12)
-
-                zipSec =
-                    List.zip secMesesIdx secMeses2
-            in
-            List.map
-                (\( idx, addAnio ) ->
-                    ( MesAnio
-                        (Array.get (idx - 1) mesesTy
-                            |> Maybe.withDefault Nov
-                        )
-                        (caso.anioMasAntiguo + addAnio)
+        anyDictBase : AnyDict LlaveComparable MesAnio Int
+        anyDictBase =
+            List.lift2
+                (\month year ->
+                    ( { mes = month
+                      , anio = year
+                      }
                     , 0
                     )
                 )
-                zipSec
+                (Array.toList mesesTy)
+                [ cas0.anioMasAntiguo, cas0.anioMasAntiguo + 1, cas0.anioMasAntiguo + 2 ]
                 |> Any.fromList
                     convierteLlave
-    in
-    ( Array.foldl
-        (\cadaElem elDic ->
-            elDic
-                |> reparteAMeses
-                    cas0
-                    (Tuple.second cadaElem)
-                    (Tuple.first cadaElem)
-        )
-        (anyDictBase cas0)
-        (secBimCons cas0 (consumoPaAtras cas0))
-    , { consumoPaAtras = consumoPaAtras cas0
 
-      {- , reparteAMeses =
-         reparteAMeses
-             cas0
-             (Tuple.first cadaElem)
-             (Tuple.second cadaElem)
-      -}
-      , anyDictBase = anyDictBase cas0
-      }
+        obtnMesPerdido : AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
+        obtnMesPerdido laDict =
+            let
+                valorPasar =
+                    Any.get
+                        (MesAnio (mesAnt cas0.mesMasAntiguo) (cas0.anioMasAntiguo + 2))
+                        laDict
+            in
+            if List.any (\a -> cas0.mesMasAntiguo == a) [ Datos.Feb, Datos.Abr, Datos.Jun, Datos.Ago, Datos.Oct, Datos.Dic ] then
+                laDict
+                    |> Any.update
+                        (MesAnio (mesAnt cas0.mesMasAntiguo) cas0.anioMasAntiguo)
+                        (\_ -> valorPasar)
+                    |> Any.update
+                        (MesAnio (mesAnt cas0.mesMasAntiguo) (cas0.anioMasAntiguo + 2))
+                        (\_ -> Just 0)
+
+            else
+                laDict
+    in
+    ( List.foldl
+        (\cadaElem elDic ->
+            actualizaLosMesesRepartiendo cadaElem elDic
+        )
+        anyDictBase
+        (secBimCons cas0)
+        |> obtnMesPerdido
+      --
+      -- Tuple.second para testear
+      --
+    , { anyDictBase = anyDictBase }
     )
 
 
@@ -467,59 +445,55 @@ obtenGenera caso m1 m2 =
 consumo : DatosP -> List { dosAtras : Float, unoAtras : Float, subsidio : Float, gen : Float, adicional : Float }
 consumo cas0 =
     let
-        obtnConsumoDelMesPenultimoAnio : DatosP -> AnyDict LlaveComparable MesAnio Int -> Mes -> Int
-        obtnConsumoDelMesPenultimoAnio caso consRepartido mes =
-            case
-                Any.get
-                    (MesAnio mes caso.anioMasAntiguo)
-                    consRepartido
-            of
-                Just consumoEse ->
-                    consumoEse
+        obtnConsumoDelMesPenultimoAnio : AnyDict LlaveComparable MesAnio Int -> Mes -> Int
+        obtnConsumoDelMesPenultimoAnio consRepartido mes =
+            Any.get
+                (MesAnio mes cas0.anioMasAntiguo)
+                consRepartido
+                |> (\consumoObtenido ->
+                        case consumoObtenido of
+                            Just 0 ->
+                                Any.get
+                                    (MesAnio mes (cas0.anioMasAntiguo + 1))
+                                    consRepartido
+                                    |> Maybe.withDefault 99999
 
-                Nothing ->
-                    case
-                        Any.get
-                            (MesAnio mes (caso.anioMasAntiguo + 1))
-                            consRepartido
-                    of
-                        Just consumoAhoraEste ->
-                            consumoAhoraEste
+                            Just cuantoCons ->
+                                cuantoCons
 
-                        Nothing ->
-                            999999
+                            Nothing ->
+                                99999
+                   )
 
-        obtnConsumoDelMesUltimoAnio : DatosP -> AnyDict LlaveComparable MesAnio Int -> Mes -> Int
-        obtnConsumoDelMesUltimoAnio caso consRepartido mes =
-            case
-                Any.get
-                    (MesAnio mes (caso.anioMasAntiguo + 2))
-                    consRepartido
-            of
-                Just consumoEse ->
-                    consumoEse
+        obtnConsumoDelMesUltimoAnio : AnyDict LlaveComparable MesAnio Int -> Mes -> Int
+        obtnConsumoDelMesUltimoAnio consRepartido mes =
+            Any.get
+                (MesAnio mes (cas0.anioMasAntiguo + 2))
+                consRepartido
+                |> (\consumoObtenido ->
+                        case consumoObtenido of
+                            Just 0 ->
+                                Any.get
+                                    (MesAnio mes (cas0.anioMasAntiguo + 1))
+                                    consRepartido
+                                    |> Maybe.withDefault 99999
 
-                Nothing ->
-                    case
-                        Any.get
-                            (MesAnio mes (caso.anioMasAntiguo + 1))
-                            consRepartido
-                    of
-                        Just consumoAhoraEste ->
-                            consumoAhoraEste
+                            Just cuantoCons ->
+                                cuantoCons
 
-                        Nothing ->
-                            999999
+                            Nothing ->
+                                99999
+                   )
     in
-    Array.map
+    List.map
         (\month ->
             { dosAtras =
-                obtnConsumoDelMesPenultimoAnio cas0 (Tuple.first (reparteConsumo cas0)) month
-                    + obtnConsumoDelMesPenultimoAnio cas0 (Tuple.first (reparteConsumo cas0)) (mesSig month)
+                obtnConsumoDelMesPenultimoAnio (Tuple.first (reparteConsumo cas0)) month
+                    + obtnConsumoDelMesPenultimoAnio (Tuple.first (reparteConsumo cas0)) (mesSig month)
                     |> toFloat
             , unoAtras =
-                obtnConsumoDelMesUltimoAnio cas0 (Tuple.first (reparteConsumo cas0)) month
-                    + obtnConsumoDelMesUltimoAnio cas0 (Tuple.first (reparteConsumo cas0)) (mesSig month)
+                obtnConsumoDelMesUltimoAnio (Tuple.first (reparteConsumo cas0)) month
+                    + obtnConsumoDelMesUltimoAnio (Tuple.first (reparteConsumo cas0)) (mesSig month)
                     |> toFloat
             , subsidio =
                 obtnSub month + obtnSub (mesSig month)
@@ -541,8 +515,7 @@ consumo cas0 =
                     0
             }
         )
-        mesesToGraph
-        |> Array.toList
+        [ Ene, Mar, May, Jul, Sep, Nov ]
 
 
 

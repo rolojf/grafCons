@@ -2,11 +2,12 @@ module Example exposing (todos)
 
 -- import Fuzz exposing (Fuzzer, int, list, string)
 
+import Array
 import Chart.Item exposing (Any)
-import Datos
+import Datos exposing (Mes(..), datosParaTest2)
 import Dict.Any as Any
 import Expect exposing (Expectation)
-import Main
+import Main exposing (MesAnio, secBimCons)
 import Test exposing (..)
 
 
@@ -15,6 +16,7 @@ todos =
         [ suite1
         , suite2
         , suite3
+        , suite4
         ]
 
 
@@ -64,13 +66,227 @@ suite2 =
         [ test "MesAnio Marzo" (\_ -> Expect.equal (Main.mesAnioSig marzo) abril)
         , test "MesAnio Diciembre" (\_ -> Expect.equal (Main.mesAnioSig diciembre) enero)
         , test "Conviete a comparable" (\_ -> Expect.equal (Main.convierteLlave abril) ( "Abr", 2022 ))
-        , test "Suma de watts anuales"
-            (\_ ->
-                Expect.lessThan 1
-                    ((Datos.datosParaTest1 |> Main.reparteConsumo |> Tuple.second |> .consumoPaAtras |> List.sum)
-                        - (Datos.datosParaTest1 |> Main.reparteConsumo |> Tuple.first |> Any.values |> List.sum)
-                    )
-            )
 
-        --, test "reparticion normal" (\_ -> Expect.equal (Main.convierteLlave abril) ( "Abr", 2022 ))
+        {- , test "Suma de watts anuales"
+               (\_ ->
+                   Expect.lessThan 1
+                       ((Datos.datosParaTest1 |> Main.reparteConsumo |> Tuple.second |> .consumoPaAtras |> List.sum)
+                           - (Datos.datosParaTest1 |> Main.reparteConsumo |> Tuple.first |> Any.values |> List.sum)
+                       )
+               )
+
+           , test "reparticion normal" (\_ -> Expect.equal (Main.convierteLlave abril) ( "Abr", 2022 ))
+        -}
+        ]
+
+
+suite4 : Test
+suite4 =
+    let
+        regError =
+            { dosAtras = 1111.1
+            , unoAtras = 2222.2
+            , subsidio = 3333.3
+            , gen = 4444.4
+            , adicional = 5555.5
+            }
+    in
+    describe "Probando para ver que acomó bien los valores en los meses"
+        [ test "Probando secBimCons"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest1
+                        |> Main.secBimCons
+                        |> List.drop 9
+                        |> List.head
+                        |> Maybe.withDefault
+                            ( { anio = 9999, mes = Datos.Ago }, 9999 )
+                    )
+                    ( { anio = 2023, mes = Datos.Ago }, 1500 )
+            )
+        , test "MesAnio Jul 2023"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest1
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Jul 2023)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (9 * 150.0 * 3 / 6))
+            )
+        , test "MesAnio Ene 2023"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest1
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Ene 2023)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (6 * 150.0 * 3 / 6))
+            )
+        , test "MesAnio Oct 2022"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest1
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Oct 2022)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (4 * 150.0 * 1 / 6 + 5 * 150 * 2 / 6))
+            )
+        , test "Probando func mesSig"
+            (\_ ->
+                Expect.equal
+                    (Main.mesSig
+                        Datos.Nov
+                    )
+                    Datos.Dic
+            )
+        , test "Probando func mesSig2"
+            (\_ ->
+                Expect.equal
+                    (Main.mesSig
+                        Datos.Dic
+                    )
+                    Datos.Ene
+            )
+        , test "MesAnio Mar 2022"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest1
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Mar 2022)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (150.0 / 2))
+            )
+        , test "MesAnio Abr 2022"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest1
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Abr 2022)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (150.0 / 6 + 2 * 150 * 2 / 6))
+            )
+        , test "Probando consumo Mar+Abr 2022 con Datos.datosParaTest1"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest1
+                        |> Main.consumo
+                        |> List.drop 1
+                        |> List.head
+                        |> Maybe.withDefault regError
+                        |> .dosAtras
+                    )
+                    ((150.0 / 2) + (150.0 / 6 + 2 * 150 * 2 / 6))
+            )
+        , test "MesAnio Nov 2023"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest1
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Nov 2023)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (11 * 150.0 / 2))
+            )
+        , test "MesAnio Dic 2023"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest1
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Dic 2023)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (11 * 150 / 6 + 12 * 150 * 2 / 6))
+            )
+        , test "Probando Nov+Dic 2023 con Datos.datosParaTest1"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest1
+                        |> Main.consumo
+                        |> List.drop 5
+                        |> List.head
+                        |> Maybe.withDefault regError
+                        |> .unoAtras
+                    )
+                    ((11 * 150.0 / 2) + (11 * 150 / 6 + 12 * 150 * 2 / 6))
+            )
+        , test "MesAnio Mar 2022 datosParaTest2"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest2
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Mar 2022)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (3 * 180.0 / 2))
+            )
+        , test "MesAnio Abr 2022 datosParaTest2"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest2
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Abr 2022)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (3 * 180.0 * 2 / 6 + 4 * 180 * 1 / 6))
+            )
+        , test "Probando consumo Mar+Abr 2022 con Datos.datosParaTest2"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest2
+                        |> Main.consumo
+                        |> List.drop 1
+                        |> List.head
+                        |> Maybe.withDefault regError
+                        |> .dosAtras
+                    )
+                    ((3 * 180.0 / 2) + (3 * 180.0 * 2 / 6 + 4 * 180 * 1 / 6))
+            )
+        , test "MesAnio Jul 2023 datosParaTest2"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest2
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Jul 2023)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (11 * 180.0 / 2))
+            )
+        , test "MesAnio Ago 2023 datosParaTest2"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest2
+                        |> Main.reparteConsumo
+                        |> Tuple.first
+                        |> Any.get (Main.MesAnio Datos.Ago 2023)
+                        |> Maybe.map toFloat
+                    )
+                    (Just (11 * 180 * 2 / 6 + 12 * 180 * 1 / 6))
+            )
+        , test "Probando Jul+Ago 2023 con Datos.datosParaTest2"
+            (\_ ->
+                Expect.equal
+                    (Datos.datosParaTest2
+                        |> Main.consumo
+                        |> List.drop 3
+                        |> List.head
+                        |> Maybe.withDefault regError
+                        |> .unoAtras
+                    )
+                    ((11 * 180.0 / 2) + (11 * 180 * 2 / 6 + 12 * 180 * 1 / 6))
+            )
         ]
