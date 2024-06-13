@@ -498,7 +498,14 @@ consumo cas0 =
                                     |> Maybe.withDefault 99999
 
                             Just cuantoCons ->
-                                cuantoCons
+                                if cas0.mesMasAntiguo == mes then
+                                    Any.get
+                                        (MesAnio mes (cas0.anioMasAntiguo + 1))
+                                        consRepartido
+                                        |> Maybe.withDefault 99999
+
+                                else
+                                    cuantoCons
 
                             Nothing ->
                                 99999

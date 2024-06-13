@@ -83,7 +83,7 @@ datosParaTest2 =
 
 datos : DatosP
 datos =
-    { paneles = 7
+    { paneles = 6
     , capPanelesWatts = 550
 
     -- capturado así primero dato frontal y de atrás datos de arriba para abajo
