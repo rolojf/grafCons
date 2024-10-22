@@ -42,8 +42,8 @@ main =
         , div
             [ css
                 [ Tw.max_w_screen_sm
-                , Tw.mt_2
-                , Tw.mx_20
+                , Tw.mt_8
+                , Tw.mx_24
                 , Tw.h_full
                 , Tw.text_3xl
                 , Tw.font_semibold
@@ -51,7 +51,7 @@ main =
                 ]
             ]
             [ text
-                ("Su Consumo vs Generación de Panel "
+                ("Consumo vs Generación. Panel "
                     ++ format usLocale (toFloat (datos.capPanelesWatts * datos.paneles) / 1000)
                     ++ " kWp"
                 )
@@ -110,8 +110,8 @@ main =
                 text ""
             , span
                 [ css [ Tw.text_color Theme.green_600 ] ]
-                [ text "Lo generado por el PANEL SOLAR, " ]
-            , text "debe alcancanzar para "
+                [ text "Lo generado por el PANEL SOLAR" ]
+            , text " debe alcancanzar para "
             , span [ css [ Tw.text_color Theme.red_600 ] ]
                 [ text "el consumo con tarifa excedente (alto costo) " ]
             , text "y a lo mejor para "
@@ -138,6 +138,11 @@ reparteAdic =
 
 limDAC =
     850
+
+
+verSubsidio : Bool
+verSubsidio =
+    False
 
 
 repartoXestacionalidad =
@@ -609,7 +614,10 @@ grafica =
                     |> C.named "Consumo año pasado"
                 ]
             , C.stacked
-                [ C.bar .subsidio [ CA.color CA.yellow, CA.opacity 0.9 ] |> C.named "Subsidiada Barata"
+                [ C.bar
+                    .subsidio
+                    [ CA.color CA.yellow, CA.opacity 0.9 ]
+                    |> C.named "Subsidiada Barata"
                 , C.bar
                     (\elReg ->
                         let
