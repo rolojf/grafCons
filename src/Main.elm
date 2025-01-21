@@ -93,32 +93,39 @@ main =
            ]
         -}
         , div [ css [ Tw.max_w_screen_sm, Tw.mt_10, Tw.mx_36, Tw.text_xl, Tw.font_semibold, Tw.text_color Theme.gray_500 ] ]
-            [ text "En cada bimestre, las dos primeras "
-            , span [ css [ Tw.text_color Theme.amber_800 ] ]
+            ([ text "En cada bimestre, las dos primeras "
+             , span [ css [ Tw.text_color Theme.amber_800 ] ]
                 [ text "barras café " ]
-            , text " son el consumo en años previos. "
-            , if datos.hayAdic then
+             , text " son el consumo en años previos. "
+             , if datos.hayAdic then
                 text "Y se suma "
 
-              else
+               else
                 text ""
-            , if datos.hayAdic then
+             , if datos.hayAdic then
                 span [ css [ Tw.text_color Theme.sky_500 ] ]
                     [ text "el consumo calculado de climas adicionales. " ]
 
-              else
+               else
                 text ""
-            , span
+             , span
                 [ css [ Tw.text_color Theme.green_600 ] ]
                 [ text "Lo generado por el PANEL SOLAR" ]
-            , text " debe alcancanzar para "
-            , span [ css [ Tw.text_color Theme.red_600 ] ]
-                [ text "el consumo con tarifa excedente (alto costo) " ]
-            , text "y a lo mejor para "
-            , span [ css [ Tw.text_color Theme.yellow_600 ] ]
-                [ text "el consumo con subsidio (bajo costo)" ]
-            , text "."
-            ]
+             ]
+                ++ (if datos.sinGraficarSubsidio then
+                        List.singleton (text " debe cubrir el consumo.")
+
+                    else
+                        [ text " debe alcancanzar para "
+                        , span [ css [ Tw.text_color Theme.red_600 ] ]
+                            [ text "el consumo con tarifa excedente (alto costo) " ]
+                        , text "y a lo mejor para "
+                        , span [ css [ Tw.text_color Theme.yellow_600 ] ]
+                            [ text "el consumo con subsidio (bajo costo)" ]
+                        , text "."
+                        ]
+                   )
+            )
         ]
         |> HtmlS.toUnstyled
 
@@ -129,7 +136,9 @@ main =
 
 genera =
     -- generación de 4 paneles de 595w = 2.38kW
-    [ 245, 259, 331, 337, 366, 367, 379, 374, 311, 287, 247, 233 ] |> Array.fromList
+    [ 245, 259, 331, 337, 366, 367, 379, 374, 311, 287, 247, 233 ]
+        |> List.map (\cons1 -> cons1 * 0.95)
+        |> Array.fromList
 
 
 reparteAdic =
@@ -555,6 +564,75 @@ consumo cas0 =
 
 grafica : Html msg
 grafica =
+    let
+        barrasHist =
+            [ C.stacked
+                [ C.bar .adicional
+                    [ CA.color CA.blue
+                    , CA.opacity 0.7
+                    ]
+                    |> C.named "Consumo adicional"
+                , C.bar .dosAtras
+                    [ CA.color CA.brown
+                    , CA.opacity 0.7
+                    ]
+                    |> C.named "Consumo año antepasado"
+                ]
+            , C.stacked
+                [ C.bar .adicional
+                    [ CA.color CA.blue
+                    , CA.opacity 0.7
+                    ]
+                    |> C.named "Consumo adicional"
+                , C.bar .unoAtras
+                    [ CA.color CA.brown
+                    , CA.opacity 0.7
+                    ]
+                    |> C.named "Consumo año pasado"
+                ]
+            ]
+
+        barrasGen =
+            C.bar (\reg -> reg.gen) [ CA.color CA.green ]
+                |> C.named
+                    ("Generada x Panel "
+                        ++ format usLocale (toFloat (datos.capPanelesWatts * datos.paneles) / 1000)
+                        ++ " kWp"
+                    )
+                |> List.singleton
+
+        barraSub =
+            [ C.stacked
+                [ C.bar
+                    .subsidio
+                    [ CA.color CA.yellow, CA.opacity 0.9 ]
+                    |> C.named "Subsidiada Barata"
+                , C.bar
+                    (\elReg ->
+                        let
+                            elMax =
+                                max 0 (max elReg.dosAtras elReg.unoAtras + elReg.adicional)
+                        in
+                        if elMax == 0 then
+                            0
+
+                        else
+                            elMax - elReg.subsidio
+                    )
+                    [ CA.color CA.red ]
+                    |> C.named "Excedente - Cara"
+                ]
+            ]
+
+        barrasGraf =
+            barrasHist
+                ++ (if datos.sinGraficarSubsidio then
+                        barrasGen
+
+                    else
+                        barraSub ++ barrasGen
+                   )
+    in
     C.chart
         [ CA.width 700
         , CA.height 420
@@ -589,56 +667,6 @@ grafica =
             ]
             [ S.text "Energía - kWh" ]
         , C.bars [ CA.margin 0.13 ]
-            [ C.stacked
-                [ C.bar .adicional
-                    [ CA.color CA.blue
-                    , CA.opacity 0.7
-                    ]
-                    |> C.named "Consumo adicional"
-                , C.bar .dosAtras
-                    [ CA.color CA.brown
-                    , CA.opacity 0.7
-                    ]
-                    |> C.named "Consumo año antepasado"
-                ]
-            , C.stacked
-                [ C.bar .adicional
-                    [ CA.color CA.blue
-                    , CA.opacity 0.7
-                    ]
-                    |> C.named "Consumo adicional"
-                , C.bar .unoAtras
-                    [ CA.color CA.brown
-                    , CA.opacity 0.7
-                    ]
-                    |> C.named "Consumo año pasado"
-                ]
-            , C.stacked
-                [ C.bar
-                    .subsidio
-                    [ CA.color CA.yellow, CA.opacity 0.9 ]
-                    |> C.named "Subsidiada Barata"
-                , C.bar
-                    (\elReg ->
-                        let
-                            elMax =
-                                max 0 (max elReg.dosAtras elReg.unoAtras + elReg.adicional)
-                        in
-                        if elMax == 0 then
-                            0
-
-                        else
-                            elMax - elReg.subsidio
-                    )
-                    [ CA.color CA.red ]
-                    |> C.named "Excedente - Cara"
-                ]
-            , C.bar (\reg -> reg.gen) [ CA.color CA.green ]
-                |> C.named
-                    ("Generada x Panel "
-                        ++ format usLocale (toFloat (datos.capPanelesWatts * datos.paneles) / 1000)
-                        ++ " kWp"
-                    )
-            ]
+            barrasGraf
             (consumo datos)
         ]
