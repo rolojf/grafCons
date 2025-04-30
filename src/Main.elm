@@ -89,7 +89,7 @@ main =
            [ css [ Tw.text_2xl, Tw.text_color Theme.lime_800, Tw.m_6 ] ]
            [ text <|
                Debug.toString <|
-                   Array.map (format usLocale) adic
+                   secBimCons datos
            ]
         -}
         , div [ css [ Tw.max_w_screen_sm, Tw.mt_10, Tw.mx_36, Tw.text_xl, Tw.font_semibold, Tw.text_color Theme.gray_500 ] ]
