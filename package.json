@@ -13,8 +13,8 @@
       "server": "python -m http.server 8421 --bind 127.0.0.12 --directory build"
    },
    "devDependencies": {
-     "elm-tooling": "^1.16.0",
-      "lamdera": "^0.19.1-1.3.2"
+     "elm-tooling": "^1.17.0",
+      "lamdera": "^0.19.1-1.4.0"
    },
    "dependencies": {
    }
