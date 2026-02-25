@@ -4,17 +4,17 @@ module Datos exposing (..)
 datos : DatosP
 datos =
     { paneles = 8
-    , capPanelesWatts = 605
+    , capPanelesWatts = 720
     , consumoTodos =
         List.reverse
             [ 764, 850, 1602, 1475, 904, 1238, 1077, 813, 1350, 1687, 995, 778 ]
     , bimestresDeHistorial = 12
-    , hayAdic = False
-    , climasAdic = []
+    , hayAdic = True
+    , climasAdic = Porcentaje 0.20
     , mesMasAntiguo = Ene
     , anioMasAntiguo = 2024
-    , nombre = "Enrique Parra"
-    , refirio = "Luis Flores"
+    , nombre = "Roberto Saenz"
+    , refirio = "Enrique Parra y Luis Flores"
     , contacto = "81 8010 2472"
     , fecha = ( Feb, 2026 ) -- de cuando piden la cotización
     , parcial = 7 / 30
@@ -556,13 +556,18 @@ type alias Clima =
     }
 
 
+type AdicionalClimas
+    = ListaDeClimas (List Clima)
+    | Porcentaje Float
+
+
 type alias DatosP =
     { paneles : Int
     , capPanelesWatts : Int
     , consumoTodos : List Int
     , bimestresDeHistorial : Int
     , hayAdic : Bool
-    , climasAdic : List Clima
+    , climasAdic : AdicionalClimas
     , mesMasAntiguo : Mes
     , anioMasAntiguo : Int
     , nombre : String
@@ -581,7 +586,7 @@ datosParaTest1 =
     , consumoTodos = List.range 1 12 |> List.map (\hm -> hm * 150)
     , bimestresDeHistorial = 12
     , hayAdic = False
-    , climasAdic = []
+    , climasAdic = ListaDeClimas []
     , mesMasAntiguo = Feb
     , anioMasAntiguo = 2022
     , nombre = "Test 1"
@@ -601,9 +606,10 @@ datosParaTest2 =
     , bimestresDeHistorial = 12
     , hayAdic = True
     , climasAdic =
-        [ { tons = 1.5, horasEnArranque = 2, tipoClima = Normal, area = "Área Social", frecUso = Semanal 7.0 2 }
-        , { tons = 1.0, horasEnArranque = 2, tipoClima = Inverter, area = "Recamara de los niños", frecUso = Diario 9.0 }
-        ]
+        ListaDeClimas
+            [ { tons = 1.5, horasEnArranque = 2, tipoClima = Normal, area = "Área Social", frecUso = Semanal 7.0 2 }
+            , { tons = 1.0, horasEnArranque = 2, tipoClima = Inverter, area = "Recamara de los niños", frecUso = Diario 9.0 }
+            ]
     , mesMasAntiguo = Oct
     , anioMasAntiguo = 2021
     , nombre = "Test 2"

@@ -131,7 +131,15 @@ viewBody _ =
                 text ""
              , if datos.hayAdic then
                 span [ css [ Tw.text_color Theme.sky_500 ] ]
-                    [ text "el consumo calculado de climas adicionales. " ]
+                    [ text
+                        (case datos.climasAdic of
+                            ListaDeClimas _ ->
+                                "el consumo calculado de climas adicionales. "
+
+                            Porcentaje pct ->
+                                "el consumo calculado con el " ++ String.fromFloat (pct * 100) ++ "% adicional. "
+                        )
+                    ]
 
                else
                 text ""
@@ -190,11 +198,11 @@ repartoXestacionalidad =
 -- * Funciones Habilitadoras
 
 
-adic : DatosP -> Array Float
-adic caso =
+adicFromLista : List Clima -> Array Float
+adicFromLista climas =
     let
         consMax =
-            List.map kWhxTonHr caso.climasAdic |> List.sum
+            List.map kWhxTonHr climas |> List.sum
     in
     List.map (\cadaMes -> consMax * cadaMes) reparteAdic |> Array.fromList
 
@@ -555,14 +563,19 @@ consumo cas0 =
     in
     List.map
         (\month ->
-            { dosAtras =
-                obtnConsumoDelMesPenultimoAnio (Tuple.first (reparteConsumo cas0)) month
-                    + obtnConsumoDelMesPenultimoAnio (Tuple.first (reparteConsumo cas0)) (mesSig month)
-                    |> toFloat
-            , unoAtras =
-                obtnConsumoDelMesUltimoAnio (Tuple.first (reparteConsumo cas0)) month
-                    + obtnConsumoDelMesUltimoAnio (Tuple.first (reparteConsumo cas0)) (mesSig month)
-                    |> toFloat
+            let
+                dosAtras =
+                    obtnConsumoDelMesPenultimoAnio (Tuple.first (reparteConsumo cas0)) month
+                        + obtnConsumoDelMesPenultimoAnio (Tuple.first (reparteConsumo cas0)) (mesSig month)
+                        |> toFloat
+
+                unoAtras =
+                    obtnConsumoDelMesUltimoAnio (Tuple.first (reparteConsumo cas0)) month
+                        + obtnConsumoDelMesUltimoAnio (Tuple.first (reparteConsumo cas0)) (mesSig month)
+                        |> toFloat
+            in
+            { dosAtras = dosAtras
+            , unoAtras = unoAtras
             , subsidio =
                 obtnSub month + obtnSub (mesSig month)
             , gen =
@@ -572,12 +585,17 @@ consumo cas0 =
                     (1 + getMesNum month)
             , adicional =
                 if cas0.hayAdic then
-                    case Maybe.map2 (+) (Array.get (getMesNum month) (adic cas0)) (Array.get (getMesNum month - 1) (adic cas0)) of
-                        Just laSuma ->
-                            laSuma
+                    case cas0.climasAdic of
+                        ListaDeClimas climas ->
+                            case Maybe.map2 (+) (Array.get (getMesNum month) (adicFromLista climas)) (Array.get (getMesNum month - 1) (adicFromLista climas)) of
+                                Just laSuma ->
+                                    laSuma
 
-                        Nothing ->
-                            100000.0
+                                Nothing ->
+                                    100000.0
+
+                        Porcentaje pct ->
+                            pct * max dosAtras unoAtras
 
                 else
                     0
