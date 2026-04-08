@@ -5,24 +5,21 @@ import Dict exposing (Dict)
 
 datos : DatosP
 datos =
-    { paneles = 11
+    { paneles = 8
     , capPanelesWatts = 645
     , consumoTodos =
         List.reverse
-            [ 1455, 2311, 1968, 1192, 1078, 870, 962, 1282, 1435, 849, 468, 457 ]
+            [ 274, 802, 1672, 195, 486, 584, 399, 786, 1020, 1268, 438, 290 ]
     , bimestresDeHistorial = 12
     , hayAdic = True
-    , climasAdic =
-        ListaDeClimas
-            [ { tons = 1.0, horasEnArranque = 4, tipoClima = Inverter, area = "Cuarto Frío", frecUso = Diario 24 }
-            ]
-    , mesMasAntiguo = Nov
+    , climasAdic = Porcentaje 0.5
+    , mesMasAntiguo = Dic
     , anioMasAntiguo = 2023
-    , nombre = "Saúl González"
-    , refirio = "Enrique Parra y Luis Flores"
+    , nombre = "Omar Rincón"
+    , refirio = "Fernando Matsui"
     , contacto = "811024 7844"
-    , fecha = ( Mar, 2026 ) -- de cuando piden la cotización
-    , parcial = 9 / 30
+    , fecha = ( Abr, 2026 ) -- de cuando piden la cotización
+    , parcial = 19 / 30
     , sinGraficarSubsidio = False
     }
 
@@ -145,6 +142,29 @@ datosParaTest2 =
 
 
 -- datos anteriores
+
+
+saulGzz =
+    { paneles = 11
+    , capPanelesWatts = 645
+    , consumoTodos =
+        List.reverse
+            [ 1455, 2311, 1968, 1192, 1078, 870, 962, 1282, 1435, 849, 468, 457 ]
+    , bimestresDeHistorial = 12
+    , hayAdic = True
+    , climasAdic =
+        ListaDeClimas
+            [ { tons = 1.0, horasEnArranque = 4, tipoClima = Inverter, area = "Cuarto Frío", frecUso = Diario 24 }
+            ]
+    , mesMasAntiguo = Nov
+    , anioMasAntiguo = 2023
+    , nombre = "Saúl González"
+    , refirio = "Enrique Parra y Luis Flores"
+    , contacto = "811024 7844"
+    , fecha = ( Mar, 2026 ) -- de cuando piden la cotización
+    , parcial = 9 / 30
+    , sinGraficarSubsidio = False
+    }
 
 
 robSainz =
