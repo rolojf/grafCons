@@ -5,21 +5,29 @@ import Dict exposing (Dict)
 
 datos : DatosP
 datos =
-    { paneles = 8
-    , capPanelesWatts = 645
+    { paneles = 6
+    , capPanelesWatts = 715
     , consumoTodos =
         List.reverse
-            [ 274, 802, 1672, 195, 486, 584, 399, 786, 1020, 1268, 438, 290 ]
+            [ 464, 778, 1707, 1852, 1565, 642, 725, 849, 1589, 1628, 1800, 611 ]
     , bimestresDeHistorial = 12
     , hayAdic = True
-    , climasAdic = Porcentaje 0.5
-    , mesMasAntiguo = Dic
-    , anioMasAntiguo = 2023
-    , nombre = "Omar Rincón"
-    , refirio = "Fernando Matsui"
+    , climasAdic =
+        ListaDeClimas
+            [ { tons = 2.0
+              , horasEnArranque = 3.0
+              , tipoClima = Normal
+              , area = "Area Social"
+              , frecUso = Semanal 5.0 1
+              }
+            ]
+    , mesMasAntiguo = Abr
+    , anioMasAntiguo = 2024
+    , nombre = "Carlos García Malo"
+    , refirio = "Arqui."
     , contacto = "811024 7844"
-    , fecha = ( Abr, 2026 ) -- de cuando piden la cotización
-    , parcial = 19 / 30
+    , fecha = ( May, 2026 ) -- de cuando piden la cotización
+    , parcial = 24 / 30
     , sinGraficarSubsidio = False
     }
 
@@ -142,6 +150,26 @@ datosParaTest2 =
 
 
 -- datos anteriores
+
+
+omarRinconRefFdo =
+    { paneles = 8
+    , capPanelesWatts = 645
+    , consumoTodos =
+        List.reverse
+            [ 274, 802, 1672, 195, 486, 584, 399, 786, 1020, 1268, 438, 290 ]
+    , bimestresDeHistorial = 12
+    , hayAdic = True
+    , climasAdic = Porcentaje 0.5
+    , mesMasAntiguo = Dic
+    , anioMasAntiguo = 2023
+    , nombre = "Omar Rincón"
+    , refirio = "Fernando Matsui"
+    , contacto = "811024 7844"
+    , fecha = ( Abr, 2026 ) -- de cuando piden la cotización
+    , parcial = 19 / 30
+    , sinGraficarSubsidio = False
+    }
 
 
 saulGzz =
