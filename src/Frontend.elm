@@ -1,4 +1,4 @@
-module Frontend exposing (app)
+module Frontend exposing (..)
 
 -- * Imports
 
@@ -102,6 +102,22 @@ viewBody _ =
                     ++ " watts cada uno / 1,000 "
                 )
             ]
+        , case huecos datos.historial of
+            [] ->
+                text ""
+
+            avisos ->
+                div
+                    [ css
+                        [ Tw.max_w_screen_sm
+                        , Tw.mt_4
+                        , Tw.mx_36
+                        , Tw.text_lg
+                        , Tw.font_semibold
+                        , Tw.text_color Theme.red_600
+                        ]
+                    ]
+                    [ text ("Revisar captura del historial: " ++ String.join "; " avisos) ]
         , div
             [ css
                 [ Tw.max_w_screen_sm
@@ -366,132 +382,126 @@ listadoDeMeses =
 -- * Repartición del Consumo
 
 
-secBimCons : DatosP -> List ( MesAnio, Int )
-secBimCons caso =
+esBisiesto : Int -> Bool
+esBisiesto anio =
+    (modBy 4 anio == 0 && modBy 100 anio /= 0) || modBy 400 anio == 0
+
+
+diasEnMes : Mes -> Int -> Int
+diasEnMes mes anio =
+    if mes == Feb then
+        if esBisiesto anio then
+            29
+
+        else
+            28
+
+    else if List.member mes [ Abr, Jun, Sep, Nov ] then
+        30
+
+    else
+        31
+
+
+{-| Días que cubre el periodo en cada mes calendario, en orden cronológico.
+Convención de lecturas del medidor: el día `del` es exclusivo y el día `al`
+es inclusivo, así la suma de días empata con la duración del periodo.
+-}
+diasPorMes : Periodo -> List ( MesAnio, Int )
+diasPorMes periodo =
     let
-        aumentaVecesElMesAnio : Int -> MesAnio -> MesAnio
-        aumentaVecesElMesAnio veces mesAnio =
-            if veces == 0 then
-                mesAnio
+        avanza : Int -> MesAnio -> List ( MesAnio, Int ) -> List ( MesAnio, Int )
+        avanza tope actual acc =
+            if tope <= 0 then
+                acc
+
+            else if actual.mes == periodo.al.mes && actual.anio == periodo.al.anio then
+                ( actual, periodo.al.dia ) :: acc
 
             else
-                aumentaVecesElMesAnio
-                    (veces - 1)
-                    (mesAnioSig (mesAnioSig mesAnio))
-
-        secBimestres : List MesAnio
-        secBimestres =
-            List.indexedMap
-                (\indice mesAnio -> aumentaVecesElMesAnio indice mesAnio)
-                (List.repeat
-                    caso.bimestresDeHistorial
-                    (MesAnio caso.mesMasAntiguo caso.anioMasAntiguo)
-                )
+                avanza (tope - 1) (mesAnioSig actual) (( actual, diasEnMes actual.mes actual.anio ) :: acc)
     in
-    List.map2
-        (\bim cons -> ( bim, cons ))
-        secBimestres
-        caso.consumoTodos
+    (if periodo.del.mes == periodo.al.mes && periodo.del.anio == periodo.al.anio then
+        [ ( MesAnio periodo.del.mes periodo.del.anio, periodo.al.dia - periodo.del.dia ) ]
+
+     else
+        avanza 12
+            (mesAnioSig (MesAnio periodo.del.mes periodo.del.anio))
+            [ ( MesAnio periodo.del.mes periodo.del.anio
+              , diasEnMes periodo.del.mes periodo.del.anio - periodo.del.dia
+              )
+            ]
+    )
+        |> List.reverse
+        |> List.filter (\( _, dias ) -> dias > 0)
 
 
-reparteConsumo :
-    DatosP
-    ->
-        ( AnyDict LlaveComparable MesAnio Int
-        , { anyDictBase : AnyDict LlaveComparable MesAnio Int
-          }
-        )
+{-| Reparte los kWh de cada periodo entre los meses calendario que toca,
+proporcional a los días cubiertos en cada mes. `dias` acumula la cobertura
+para saber si un mes quedó completo.
+-}
+reparteConsumo : DatosP -> AnyDict LlaveComparable MesAnio { kwh : Float, dias : Int }
 reparteConsumo cas0 =
     let
-        actualizaLosMesesRepartiendo : ( MesAnio, Int ) -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
-        actualizaLosMesesRepartiendo ( mesAnioInicioDeCadaBimestre, consumoDelBim ) elDict =
+        agrega : Periodo -> AnyDict LlaveComparable MesAnio { kwh : Float, dias : Int } -> AnyDict LlaveComparable MesAnio { kwh : Float, dias : Int }
+        agrega periodo dict =
             let
-                uno =
-                    round <| (1 - cas0.parcial) * 30.0 * (toFloat consumoDelBim / 60.0)
+                reparto =
+                    diasPorMes periodo
 
-                dos =
-                    round <| 30.0 * (toFloat consumoDelBim / 60.0)
-
-                tres =
-                    consumoDelBim - uno - dos
+                totalDias =
+                    List.sum (List.map Tuple.second reparto)
             in
-            elDict
-                |> Any.update
-                    mesAnioInicioDeCadaBimestre
-                    (Maybe.map ((+) uno))
-                |> Any.update
-                    (mesAnioSig mesAnioInicioDeCadaBimestre)
-                    (Maybe.map ((+) dos))
-                |> Any.update
-                    (mesAnioSig (mesAnioSig mesAnioInicioDeCadaBimestre))
-                    (Maybe.map ((+) tres))
-
-        anyDictBase : AnyDict LlaveComparable MesAnio Int
-        anyDictBase =
-            List.lift2
-                (\month year ->
-                    ( { mes = month
-                      , anio = year
-                      }
-                    , 0
-                    )
+            List.foldl
+                (\( mesAnio, dias ) d ->
+                    Any.update mesAnio
+                        (\previo ->
+                            let
+                                p =
+                                    Maybe.withDefault { kwh = 0, dias = 0 } previo
+                            in
+                            Just
+                                { kwh = p.kwh + toFloat periodo.kWh * toFloat dias / toFloat totalDias
+                                , dias = p.dias + dias
+                                }
+                        )
+                        d
                 )
-                (Array.toList mesesTy)
-                [ cas0.anioMasAntiguo, cas0.anioMasAntiguo + 1, cas0.anioMasAntiguo + 2 ]
-                |> Any.fromList
-                    convierteLlave
-
-        obtnMesPerdido : Datos.Mes -> AnyDict LlaveComparable MesAnio Int -> AnyDict LlaveComparable MesAnio Int
-        obtnMesPerdido mmes laDict =
-            let
-                valorPasar0 =
-                    Any.get
-                        (MesAnio mmes cas0.anioMasAntiguo)
-                        laDict
-
-                valorPasar1 =
-                    Any.get
-                        (MesAnio mmes (cas0.anioMasAntiguo + 1))
-                        laDict
-
-                valorPasar2 =
-                    Any.get
-                        (MesAnio mmes (cas0.anioMasAntiguo + 2))
-                        laDict
-
-                valorPasar3 =
-                    Any.get
-                        (MesAnio mmes (cas0.anioMasAntiguo + 3))
-                        laDict
-
-                _ =
-                    Debug.log "Valores pasados" ( mmes, [ ( 0, valorPasar0 ), ( 1, valorPasar1 ), ( 2, valorPasar2 ), ( 3, valorPasar3 ) ] )
-            in
-            {- if List.any (\a -> cas0.mesMasAntiguo == a) [ Datos.Feb, Datos.Abr, Datos.Jun, Datos.Ago, Datos.Oct, Datos.Dic ] then
-                   laDict
-                       |> Any.update
-                           (MesAnio (mesAnt cas0.mesMasAntiguo) cas0.anioMasAntiguo)
-                           (\_ -> valorPasar0)
-                       |> Any.update
-                           (MesAnio (mesAnt cas0.mesMasAntiguo) (cas0.anioMasAntiguo + 2))
-                           (\_ -> Just 0)
-
-               else
-            -}
-            laDict
+                dict
+                reparto
     in
-    ( List.foldl
-        (\cadaElem elDic ->
-            actualizaLosMesesRepartiendo cadaElem elDic
+    List.foldl agrega (Any.empty convierteLlave) cas0.historial
+
+
+{-| Filas del historial que no encadenan: el `al` de un periodo debe ser
+el `del` del siguiente. Si hay huecos probablemente hubo error de captura.
+-}
+huecos : List Periodo -> List String
+huecos historial =
+    let
+        ordenados =
+            List.sortBy (\p -> ( p.del.anio, getMesNum p.del.mes, p.del.dia )) historial
+
+        fechaTx f =
+            String.fromInt f.dia ++ " " ++ getMesTxt f.mes ++ " " ++ String.fromInt f.anio
+    in
+    List.map2
+        (\anterior siguiente ->
+            if anterior.al == siguiente.del then
+                Nothing
+
+            else
+                Just
+                    ("el periodo que inicia el "
+                        ++ fechaTx siguiente.del
+                        ++ " no empata con el fin del anterior ("
+                        ++ fechaTx anterior.al
+                        ++ ")"
+                    )
         )
-        anyDictBase
-        (secBimCons cas0)
-      -- |> obtnMesPerdido Datos.Ago
-      --
-      -- Tuple.second para testear
-      --
-    , { anyDictBase = anyDictBase }
-    )
+        ordenados
+        (List.drop 1 ordenados)
+        |> List.filterMap identity
 
 
 obtnSub : Mes -> Float
@@ -514,65 +524,54 @@ obtenGenera caso m1 m2 =
 consumo : DatosP -> List { dosAtras : Float, unoAtras : Float, subsidio : Float, gen : Float, adicional : Float }
 consumo cas0 =
     let
-        obtnConsumoDelMesPenultimoAnio : AnyDict LlaveComparable MesAnio Int -> Mes -> Int
-        obtnConsumoDelMesPenultimoAnio consRepartido mes =
-            Any.get
-                (MesAnio mes cas0.anioMasAntiguo)
-                consRepartido
-                |> (\consumoObtenido ->
-                        case consumoObtenido of
-                            Just 0 ->
-                                Any.get
-                                    (MesAnio mes (cas0.anioMasAntiguo + 1))
-                                    consRepartido
-                                    |> Maybe.withDefault 99999
+        repartido =
+            reparteConsumo cas0
 
-                            Just cuantoCons ->
-                                cuantoCons
+        -- ( consumo del año más antiguo con el mes completo, ídem del más reciente )
+        consMes : Mes -> ( Float, Float )
+        consMes mes =
+            let
+                todas =
+                    Any.toList repartido
+                        |> List.filter (\( ma, _ ) -> ma.mes == mes)
+                        |> List.sortBy (\( ma, _ ) -> ma.anio)
 
-                            Nothing ->
-                                99999
-                   )
+                completas =
+                    todas
+                        |> List.filter (\( ma, reg ) -> reg.dias >= diasEnMes ma.mes ma.anio)
+                        |> List.map (\( _, reg ) -> reg.kwh)
+            in
+            case completas of
+                primero :: resto ->
+                    ( primero, List.last resto |> Maybe.withDefault primero )
 
-        obtnConsumoDelMesUltimoAnio : AnyDict LlaveComparable MesAnio Int -> Mes -> Int
-        obtnConsumoDelMesUltimoAnio consRepartido mes =
-            Any.get
-                (MesAnio mes (cas0.anioMasAntiguo + 2))
-                consRepartido
-                |> (\consumoObtenido ->
-                        case consumoObtenido of
-                            Just 0 ->
-                                Any.get
-                                    (MesAnio mes (cas0.anioMasAntiguo + 1))
-                                    consRepartido
-                                    |> Maybe.withDefault 99999
+                [] ->
+                    -- sin mes completo: escala la mayor cobertura parcial al mes entero
+                    case List.maximumBy (\( _, reg ) -> reg.dias) todas of
+                        Just ( ma, reg ) ->
+                            let
+                                escalado =
+                                    reg.kwh * toFloat (diasEnMes ma.mes ma.anio) / toFloat reg.dias
+                            in
+                            ( escalado, escalado )
 
-                            Just cuantoCons ->
-                                if cas0.mesMasAntiguo == mes then
-                                    Any.get
-                                        (MesAnio mes (cas0.anioMasAntiguo + 1))
-                                        consRepartido
-                                        |> Maybe.withDefault 99999
-
-                                else
-                                    cuantoCons
-
-                            Nothing ->
-                                99999
-                   )
+                        Nothing ->
+                            ( 0, 0 )
     in
     List.map
         (\month ->
             let
+                ( mesViejo1, mesNuevo1 ) =
+                    consMes month
+
+                ( mesViejo2, mesNuevo2 ) =
+                    consMes (mesSig month)
+
                 dosAtras =
-                    obtnConsumoDelMesPenultimoAnio (Tuple.first (reparteConsumo cas0)) month
-                        + obtnConsumoDelMesPenultimoAnio (Tuple.first (reparteConsumo cas0)) (mesSig month)
-                        |> toFloat
+                    mesViejo1 + mesViejo2
 
                 unoAtras =
-                    obtnConsumoDelMesUltimoAnio (Tuple.first (reparteConsumo cas0)) month
-                        + obtnConsumoDelMesUltimoAnio (Tuple.first (reparteConsumo cas0)) (mesSig month)
-                        |> toFloat
+                    mesNuevo1 + mesNuevo2
             in
             { dosAtras = dosAtras
             , unoAtras = unoAtras

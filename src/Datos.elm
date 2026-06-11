@@ -6,11 +6,58 @@ import Dict exposing (Dict)
 datos : DatosP
 datos =
     { paneles = 6
+    , capPanelesWatts = 645
+
+    -- recibo: reccibos/recibo_cfe-2.pdf; el periodo más nuevo (624 kWh)
+    -- viene de la carátula, el resto de la tabla de consumo histórico
+    , historial =
+        [ { del = fecha 10 Feb 26, al = fecha 13 Abr 26, kWh = 624 }
+        , { del = fecha 11 Dic 25, al = fecha 10 Feb 26, kWh = 930 }
+        , { del = fecha 14 Oct 25, al = fecha 11 Dic 25, kWh = 670 }
+        , { del = fecha 12 Ago 25, al = fecha 14 Oct 25, kWh = 947 }
+        , { del = fecha 10 Jun 25, al = fecha 12 Ago 25, kWh = 1160 }
+        , { del = fecha 9 Abr 25, al = fecha 10 Jun 25, kWh = 980 }
+        , { del = fecha 11 Feb 25, al = fecha 9 Abr 25, kWh = 766 }
+        , { del = fecha 10 Dic 24, al = fecha 11 Feb 25, kWh = 1340 }
+        , { del = fecha 10 Oct 24, al = fecha 10 Dic 24, kWh = 598 }
+        , { del = fecha 12 Ago 24, al = fecha 10 Oct 24, kWh = 950 }
+        , { del = fecha 11 Jun 24, al = fecha 12 Ago 24, kWh = 1193 }
+        , { del = fecha 11 Abr 24, al = fecha 11 Jun 24, kWh = 1444 }
+        ]
+    , hayAdic = False
+    , climasAdic = ListaDeClimas []
+    , nombre = "Adrián Marcelo Garza Caballero"
+    , refirio = ""
+    , contacto = ""
+    , fecha = ( Jun, 2026 ) -- de cuando piden la cotización
+    , sinGraficarSubsidio = False
+    }
+
+
+
+-- datos anteriores
+
+
+carlosGarciaMalo =
+    { paneles = 6
     , capPanelesWatts = 715
-    , consumoTodos =
-        List.reverse
-            [ 464, 778, 1707, 1852, 1565, 642, 725, 849, 1589, 1628, 1800, 611 ]
-    , bimestresDeHistorial = 12
+
+    -- fechas aproximadas, derivadas del formato anterior (mes + día promedio);
+    -- reemplazar con las fechas reales del recibo
+    , historial =
+        [ { del = fecha 24 Feb 26, al = fecha 24 Abr 26, kWh = 464 }
+        , { del = fecha 24 Dic 25, al = fecha 24 Feb 26, kWh = 778 }
+        , { del = fecha 24 Oct 25, al = fecha 24 Dic 25, kWh = 1707 }
+        , { del = fecha 24 Ago 25, al = fecha 24 Oct 25, kWh = 1852 }
+        , { del = fecha 24 Jun 25, al = fecha 24 Ago 25, kWh = 1565 }
+        , { del = fecha 24 Abr 25, al = fecha 24 Jun 25, kWh = 642 }
+        , { del = fecha 24 Feb 25, al = fecha 24 Abr 25, kWh = 725 }
+        , { del = fecha 24 Dic 24, al = fecha 24 Feb 25, kWh = 849 }
+        , { del = fecha 24 Oct 24, al = fecha 24 Dic 24, kWh = 1589 }
+        , { del = fecha 24 Ago 24, al = fecha 24 Oct 24, kWh = 1628 }
+        , { del = fecha 24 Jun 24, al = fecha 24 Ago 24, kWh = 1800 }
+        , { del = fecha 24 Abr 24, al = fecha 24 Jun 24, kWh = 611 }
+        ]
     , hayAdic = True
     , climasAdic =
         ListaDeClimas
@@ -21,13 +68,10 @@ datos =
               , frecUso = Semanal 5.0 1
               }
             ]
-    , mesMasAntiguo = Abr
-    , anioMasAntiguo = 2024
     , nombre = "Carlos García Malo"
     , refirio = "Arqui."
     , contacto = "811024 7844"
     , fecha = ( May, 2026 ) -- de cuando piden la cotización
-    , parcial = 24 / 30
     , sinGraficarSubsidio = False
     }
 
@@ -46,6 +90,35 @@ mesMasAntiguo =
     , ( "Faby", May )
     ]
         |> Dict.fromList
+
+
+type alias Fecha =
+    { dia : Int
+    , mes : Mes
+    , anio : Int
+    }
+
+
+{-| Como aparece en el recibo: fecha 6 Feb 25. Años menores a 100 se vuelven 20xx.
+-}
+fecha : Int -> Mes -> Int -> Fecha
+fecha dia mes anio =
+    { dia = dia
+    , mes = mes
+    , anio =
+        if anio < 100 then
+            2000 + anio
+
+        else
+            anio
+    }
+
+
+type alias Periodo =
+    { del : Fecha
+    , al : Fecha
+    , kWh : Int
+    }
 
 
 type Mes
@@ -91,17 +164,13 @@ type AdicionalClimas
 type alias DatosP =
     { paneles : Int
     , capPanelesWatts : Int
-    , consumoTodos : List Int
-    , bimestresDeHistorial : Int
+    , historial : List Periodo
     , hayAdic : Bool
     , climasAdic : AdicionalClimas
-    , mesMasAntiguo : Mes
-    , anioMasAntiguo : Int
     , nombre : String
     , refirio : String
     , contacto : String
     , fecha : ( Mes, Int )
-    , parcial : Float
     , sinGraficarSubsidio : Bool
     }
 
@@ -110,17 +179,29 @@ datosParaTest1 : DatosP
 datosParaTest1 =
     { paneles = 8
     , capPanelesWatts = 550
-    , consumoTodos = List.range 1 12 |> List.map (\hm -> hm * 150)
-    , bimestresDeHistorial = 12
+
+    -- periodos que terminan en fin de mes para que cada mes calendario
+    -- quede completo y los valores sean calculables a mano: kWh = n * 150
+    , historial =
+        [ { del = fecha 31 Dic 23, al = fecha 29 Feb 24, kWh = 1800 }
+        , { del = fecha 31 Oct 23, al = fecha 31 Dic 23, kWh = 1650 }
+        , { del = fecha 31 Ago 23, al = fecha 31 Oct 23, kWh = 1500 }
+        , { del = fecha 30 Jun 23, al = fecha 31 Ago 23, kWh = 1350 }
+        , { del = fecha 30 Abr 23, al = fecha 30 Jun 23, kWh = 1200 }
+        , { del = fecha 28 Feb 23, al = fecha 30 Abr 23, kWh = 1050 }
+        , { del = fecha 31 Dic 22, al = fecha 28 Feb 23, kWh = 900 }
+        , { del = fecha 31 Oct 22, al = fecha 31 Dic 22, kWh = 750 }
+        , { del = fecha 31 Ago 22, al = fecha 31 Oct 22, kWh = 600 }
+        , { del = fecha 30 Jun 22, al = fecha 31 Ago 22, kWh = 450 }
+        , { del = fecha 30 Abr 22, al = fecha 30 Jun 22, kWh = 300 }
+        , { del = fecha 28 Feb 22, al = fecha 30 Abr 22, kWh = 150 }
+        ]
     , hayAdic = False
     , climasAdic = ListaDeClimas []
-    , mesMasAntiguo = Feb
-    , anioMasAntiguo = 2022
     , nombre = "Test 1"
     , refirio = "yo mesmo"
     , contacto = "123-345-6789"
     , fecha = ( May, 2024 )
-    , parcial = 10 / 30
     , sinGraficarSubsidio = False
     }
 
@@ -129,27 +210,34 @@ datosParaTest2 : DatosP
 datosParaTest2 =
     { paneles = 16
     , capPanelesWatts = 610
-    , consumoTodos = List.range 1 12 |> List.map (\hm -> hm * 180)
-    , bimestresDeHistorial = 12
+
+    -- mismo esquema que datosParaTest1 pero arrancando en Oct 21: kWh = n * 180
+    , historial =
+        [ { del = fecha 31 Ago 23, al = fecha 31 Oct 23, kWh = 2160 }
+        , { del = fecha 30 Jun 23, al = fecha 31 Ago 23, kWh = 1980 }
+        , { del = fecha 30 Abr 23, al = fecha 30 Jun 23, kWh = 1800 }
+        , { del = fecha 28 Feb 23, al = fecha 30 Abr 23, kWh = 1620 }
+        , { del = fecha 31 Dic 22, al = fecha 28 Feb 23, kWh = 1440 }
+        , { del = fecha 31 Oct 22, al = fecha 31 Dic 22, kWh = 1260 }
+        , { del = fecha 31 Ago 22, al = fecha 31 Oct 22, kWh = 1080 }
+        , { del = fecha 30 Jun 22, al = fecha 31 Ago 22, kWh = 900 }
+        , { del = fecha 30 Abr 22, al = fecha 30 Jun 22, kWh = 720 }
+        , { del = fecha 28 Feb 22, al = fecha 30 Abr 22, kWh = 540 }
+        , { del = fecha 31 Dic 21, al = fecha 28 Feb 22, kWh = 360 }
+        , { del = fecha 31 Oct 21, al = fecha 31 Dic 21, kWh = 180 }
+        ]
     , hayAdic = True
     , climasAdic =
         ListaDeClimas
             [ { tons = 1.5, horasEnArranque = 2, tipoClima = Normal, area = "Área Social", frecUso = Semanal 7.0 2 }
             , { tons = 1.0, horasEnArranque = 2, tipoClima = Inverter, area = "Recamara de los niños", frecUso = Diario 9.0 }
             ]
-    , mesMasAntiguo = Oct
-    , anioMasAntiguo = 2021
     , nombre = "Test 2"
     , refirio = "yo mesmo"
     , contacto = "123-345-6789"
     , fecha = ( May, 2024 )
-    , parcial = 20 / 30
     , sinGraficarSubsidio = False
     }
-
-
-
--- datos anteriores
 
 
 omarRinconRefFdo =
